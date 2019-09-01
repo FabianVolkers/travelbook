@@ -2,7 +2,7 @@
   <v-app>
     <v-content>
       <Toolbar/>
-      <ProfileView username="Fabian" v-bind:location="location"/>
+      <ProfileView v-bind:user="this.user"/>
     </v-content>
   </v-app>
 </template>
@@ -19,12 +19,13 @@ export default {
   },
   data: () => ({
     //
-    location: {name: 'Berlin', lat: '-32.065555810864744', lon: '115.7190338134766',
-            left: '88.51444244384766',
-            bottom: '-44.71685554176402',
-            right: '110.80936431884768',
-            top: '-17.394381203596815',
-            },
+    user: {
+      id: "1",
+      username: "Fabian",
+      profile_picture_path: "",
+      cover_photo_path: "https://c1.staticflickr.com/7/6190/6149540877_e5cfd006c2_z.jpg",
+
+    }
   }),
 };
 </script>

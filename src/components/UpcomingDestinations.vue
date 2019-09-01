@@ -3,15 +3,21 @@
     
     <v-card
       class="mx-auto"
-      max-width= 30vw
       tile
     >
-    <h3 id="countdownElem">{{ destinations[1].name }}: {{ countdownString }}</h3>
+    <v-card-title>{{ username }}'s Upcoming Destinations</v-card-title>
       <v-list>
-        <v-subheader>{{ username }}'s Upcoming Destinations</v-subheader>
-        <v-list-item-group v-model="destination" color="primary">
+        <v-list-item-group color="primary">
+            <v-list-item>
+                <v-list-item-content>
+              <v-list-item-title v-html="destinations[1].name"></v-list-item-title>
+              <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
+            </v-list-item-content>
+            </v-list-item>
+            </v-list-item-group>
+            <v-list-item-group color="primary">
           <v-list-item two-line
-            v-for="(destination, i) in destinations"
+            v-for="(destination, i) in upcoming"
             :key="i"
           >
             <v-list-item-content>
@@ -35,12 +41,14 @@ export default {
   },
   data: () => ({
       interval: "",
-    countdownString: "countdown",
+    countdownString: "",
+    upcoming: [],
   }),
   methods: {
       countdown: function(timestamp){
         // Get todays date and time
-        var now = new Date().getTime();
+        var x = setInterval(function() {
+            var now = new Date().getTime();
 
         var countdownTime = new Date(timestamp);
 
@@ -60,16 +68,23 @@ export default {
             } else {
                 this.countdownString = days + " days " + hours + " hours " + minutes + " minutes " + seconds + " seconds ";
             }
-            console.log(this.countdownString);
-      },
-
+            //console.log(this.countdownString);
+      }.bind(this), 1000)
+    },
+    displayArray: function(destinationsArray){
+        this.upcoming = destinationsArray.slice();
+        this.upcoming.shift();
+        this.upcoming.shift();
+    }
   },
   beforeMount(){
-      //this.countdown(this.destinations[1].date);
+      this.countdown(this.destinations[1].date);
+      this.displayArray(this.destinations);
       //this.$forceUpdate();
   },
   created(){
-      var x = setInterval(this.countdown(this.destinations[1].date), 1000);
-  }
+      this.countdown(this.destinations[1].date);
+  },
+
 }
 </script>
