@@ -6,9 +6,9 @@
       <div class="flex-grow-1"></div>
 
       <v-toolbar-items>
-        <v-btn text>Link 1</v-btn>
-        <v-btn text>Link 2</v-btn>
-        <v-btn text>Link 3</v-btn>
+        <v-btn text>Home</v-btn>
+        <v-btn text>Friends</v-btn>
+        <v-btn text>Travel Guides</v-btn>
       </v-toolbar-items>
 
       <template v-if="$vuetify.breakpoint.smAndUp">

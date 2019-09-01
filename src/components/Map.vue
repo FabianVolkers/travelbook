@@ -2,7 +2,6 @@
 <v-container>
     <v-card
       class="mx-auto"
-      tile
     >
     <v-card-title>{{ username }} is in {{ location.name }}</v-card-title>
     <iframe
