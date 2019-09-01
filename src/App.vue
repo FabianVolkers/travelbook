@@ -2,20 +2,20 @@
   <v-app>
     <v-content>
       <Toolbar/>
-      <HomeView username="Fabian" v-bind:location="location"/>
+      <ProfileView username="Fabian" v-bind:location="location"/>
     </v-content>
   </v-app>
 </template>
 
 <script>
 import Toolbar from './components/Toolbar'
-import HomeView from './components/HomeView'
+import ProfileView from './components/ProfileView'
 
 export default {
   name: 'App',
   components: {
     Toolbar,
-    HomeView,
+    ProfileView,
   },
   data: () => ({
     //

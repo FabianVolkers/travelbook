@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar>
-      <v-toolbar-title>Title</v-toolbar-title>
+      <v-toolbar-title>Travelbook</v-toolbar-title>
 
       <div class="flex-grow-1"></div>
 
