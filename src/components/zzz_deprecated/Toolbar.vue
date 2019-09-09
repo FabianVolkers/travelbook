@@ -6,7 +6,7 @@
       <div class="flex-grow-1"></div>
 
       <v-toolbar-items>
-        <v-btn text>Home</v-btn>
+        <v-btn text @click:tab=0>Home</v-btn>
         <v-btn text>Friends</v-btn>
         <v-btn text>Travel Guides</v-btn>
       </v-toolbar-items>

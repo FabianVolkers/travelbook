@@ -3,7 +3,7 @@
     <v-card
       class="mx-auto"
     >
-    <v-card-title>{{ username }} is in {{ location.name }}</v-card-title>
+    <v-card-title>{{ username }} is in {{ location.location }}</v-card-title>
     <iframe
         id="map" 
         frameborder="0" 
@@ -22,7 +22,7 @@ export default {
   props: {
     username: String,
     location: Object,
-  }
+  },
 }
 </script>
 

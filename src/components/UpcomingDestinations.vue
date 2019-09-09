@@ -10,7 +10,7 @@
         <v-list-item-group color="primary">
             <v-list-item>
                 <v-list-item-content>
-              <v-list-item-title v-html="destinations[1].name"></v-list-item-title>
+              <v-list-item-title v-html="destinations[1].location"></v-list-item-title>
               <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
             </v-list-item-content>
             </v-list-item>
@@ -21,12 +21,13 @@
             :key="i"
           >
             <v-list-item-content>
-              <v-list-item-title v-html="destination.name"></v-list-item-title>
+              <v-list-item-title v-html="destination.location"></v-list-item-title>
               <v-list-item-subtitle v-html="destination.date"></v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list-item-group>
       </v-list>
+      <v-btn class="mr-4" href="./NewDestination.vue">Add Destination</v-btn>
     </v-card>
   </v-row>
 </template>
@@ -79,11 +80,15 @@ export default {
   },
   beforeMount(){
       this.countdown(this.destinations[1].date);
-      this.displayArray(this.destinations);
-      //this.$forceUpdate();
+      
+      
+      //
   },
-  created(){
+  mounted(){
       this.countdown(this.destinations[1].date);
+      this.displayArray(this.destinations);
+      console.log(this.destinations);
+      this.$forceUpdate();
   },
 
 }
