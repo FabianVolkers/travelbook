@@ -9,40 +9,40 @@
       <v-toolbar-items>
         <v-btn text @click="tab=0">Home</v-btn>
         <v-btn text @click="tab=1">Friends</v-btn>
-        <v-btn text @click="tab=2">Travel Guides</v-btn>
+        <v-btn  text @click="tab=2">Admin</v-btn>
       </v-toolbar-items>
 
     </v-toolbar>
       <ProfileView v-if="tab == 0" v-bind:user="this.user"/>
       <Friends v-if="tab == 1" v-bind:user="this.user"/>
+      <AdminPanel v-if="tab == 2"/>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import ProfileView from './components/ProfileView'
-import Friends from './components/Friends'
+import ProfileView from './views/ProfileView'
+import Friends from './views/Friends'
+import AdminPanel from './views/AdminPanel'
+
+
 
 export default {
   name: 'App',
   components: {
     ProfileView,
     Friends,
+    AdminPanel
   },
   props: {
-    activePage: String
+    activePage: String,
+    route: Object,
   },
   data: () => ({
     //
-    user: {
-      id: "1",
-      name: "Fabian",
-      profile_picture_path: "",
-      cover_photo_path: "https://c1.staticflickr.com/7/6190/6149540877_e5cfd006c2_z.jpg",
-
-    },
+    user: {},
     tab: 0
   }),
-
+  
 };
 </script>

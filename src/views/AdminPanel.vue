@@ -1,0 +1,148 @@
+<template>
+      <v-container>
+          <h1>AdminPanel</h1>
+      
+          <v-list-item two-line v-for="city in cities" :key="city.id">
+            
+            <v-list-item-content>
+              <v-form @submit.prevent="editCity(city)">
+              <v-row>
+                <v-col cols="0" md="0" hidden>
+                  <v-text-field name="id" v-model="city.id" required></v-text-field>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-text-field label="City" name="city" v-model="city.name" required></v-text-field>
+                </v-col>
+
+                <v-col cols="12" md="2">
+                  <v-text-field label="Latitude" name="lat" v-model="city.lat" required> </v-text-field>
+                </v-col>
+                <v-col cols="12" md="2"><v-text-field label="Longitude" name="lon" v-model="city.lon" required></v-text-field>
+                </v-col>
+                <v-col cols="12" md="3">
+                <v-text-field label="Photo Url" name="url" v-model="city.photo_url" required></v-text-field>
+              </v-col>
+                <v-col cols="12" md="1"><v-btn type="submit" class="mr-2">Save</v-btn>
+                </v-col>
+                <v-col cols="12" md="1"><v-btn class="mr-4" @click="deleteCity(city)">Delete</v-btn>
+                </v-col>
+              </v-row>
+              </v-form>
+            </v-list-item-content>
+          </v-list-item>
+      
+      <v-list-item>
+        <v-list-item-content>
+            <v-form @submit.prevent="addCity">
+            <v-row>
+              <v-col cols="12" md="2">
+                <v-text-field label="City" name="city" v-model="newCity.name" required></v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="2">
+                <v-text-field label="Latitude" name="lat" v-model="newCity.lat" required></v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="2">
+                <v-text-field label="Longitude" name="lon" v-model="newCity.lon" required></v-text-field>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-text-field label="Photo Url" name="url" v-model="newCity.photo_url" required></v-text-field>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-btn type="submit" class="mr-4">Add City</v-btn>
+              </v-col>
+           
+          </v-row>
+           </v-form>
+
+        </v-list-item-content>
+      </v-list-item>-
+      </v-container>
+</template>
+
+<script>
+  import axios from 'axios'
+
+  export default {
+    name: 'AdminPanel',
+    props: {
+      destinations: Array,
+      user: Object,
+    },
+    data: () => ({
+      baseurl: "http://localhost:5345/",
+      cities: [],
+      newCity: {
+          name: "",
+          lat: "",
+          lon: "",
+          photo_url: ""
+      }
+
+    }),
+    methods: {
+      getCities(){
+          axios.get(this.baseurl + "api/v1/cities")
+          .then(response => {
+                        // JSON responses are automatically parsed
+                        this.cities = response.data
+                        console.log(this.cities)
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+      },
+      addCity(){
+        var url = this.baseurl + 'city/add'
+        
+        /*
+        var addDestination = {
+          userid: this.user.id,
+          city: this.newDestination.city,
+          date: this.newDestination.date,
+          time: this.newDestination.time
+        }
+        console.log(addDestination)
+        */
+        console.log(this.newCity)
+        
+        axios.post(url, this.newCity)
+        this.$forceUpdate
+      },
+
+      editCity(city){
+        var url = this.baseurl + 'city/edit'
+        var date = new Date(city.date);
+        city.datestring = date.getUTCFullYear() + "-" + this.addZero((date.getMonth())+1) + "-" + this.addZero(date.getDate())
+        var updatedCity = {
+          name: city.location,
+          date: city.datestring,
+          time: city.time,
+          id: city.id
+        }
+        console.log("updating city")
+        axios.post(url, updatedCity)
+        this.$forceUpdate
+      },
+      deleteCity(city){
+        var url = this.baseurl + 'city/delete'
+        var delCity = {
+          id: city.id
+        }
+        console.log("deleting city")
+        axios.post(url, delCity)
+        this.$forceUpdate
+      },
+      addZero(i) {
+        if(i < 10){
+          i = "0" + i
+        }
+        return i;
+      }
+    },
+    mounted() {
+        this.getCities()
+    }
+  }
+</script>
