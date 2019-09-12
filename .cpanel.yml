@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/fabidton/travelbook/app
+    - export DEPLOYPATH=/home/fabidton/travel/app
     - cp -R ./ $DEPLOYPATH
