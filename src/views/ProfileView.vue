@@ -1,6 +1,6 @@
 <template>
     <v-container fluid>
-        <v-row id="title-row" no-gutters>
+        <v-row id="title-row" no-gutters v-if="gotData">
             <v-col cols="12">
                 <v-card class="mx-auto" width="100%">
                     <v-img id="cover-photo" class="white--text" v-bind:src="user.cover_photo_path">
@@ -21,13 +21,17 @@
                         <v-list>
                           <v-list-item-group color="primary">
                                  <v-list-item>
-                                    <v-list-item-content>
+                                    <v-list-item-content v-if="destinations[1]">
                                         <v-list-item-title v-html="destinations[1].location"></v-list-item-title>
                                         <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
                                     </v-list-item-content>
+                                    <v-list-item-content v-if="!destinations[1]">
+                                        <v-list-item-title>No upcoming destinations</v-list-item-title>
+                                        <v-list-item-subtitle></v-list-item-subtitle>
+                                    </v-list-item-content>
                                 </v-list-item>
                             </v-list-item-group>
-                             <v-list-item-group color="primary">
+                             <v-list-item-group v-if="upcoming" color="primary">
                                 <v-list-item two-line v-for="(destination, i) in upcoming" :key="i">
                                     <v-list-item-content>
                                         <v-list-item-title v-html="destination.location"></v-list-item-title>
@@ -44,7 +48,7 @@
             </v-col>
             <v-col cols="12" sm="8" xs="12" order="1" order-md="12" order-lg="12">
                 <v-card class="mx-auto">
-                    <v-card-title>{{ this.user.name }} is in {{ this.user.current_location }}</v-card-title>
+                    <v-card-title>{{ user.name }} is in {{ user.current_location }}</v-card-title>
                     <iframe id="map" frameborder="0" marginheight="0" marginwidth="0"
                         v-bind:src="'https://www.openstreetmap.org/export/embed.html?bbox=' + (this.user.lon-9) + '%2C' + (this.user.lat-6) + '%2C' + (this.user.lon+9) + '%2C' + (this.user.lat+6) + '&amp;layer=mapnik&amp;marker=' + this.user.lat + '%2C' + this.user.lon">
                     </iframe>
@@ -74,7 +78,7 @@
         data: () => ({
             destinations: [],
             user: {},
-            baseurl: 'http://localhost:5345/',
+            baseurl: 'https://fabiserv.uber.space/api/v1/',
             interval: "",
             countdownString: "",
             upcoming: [],
@@ -82,26 +86,24 @@
             overlay: false,
             day: "",
             time: "",
+            gotData: false,
         }),
         methods: {
             async getUser(userID) {
 
                 this.user.id = userID
-                var url = this.baseurl + "api/v1/user/" + this.user.id
+                var url = this.baseurl + "user/" + this.user.id
 
                 await axios.get(url)
                     .then(response => {
                         // JSON responses are automatically parsed
                         this.user.name = response.data[0].name
-                        console.log(this.user)
                     })
                     .catch(e => {
                         this.errors.push(e)
                     })
-                this.$forceUpdate
                 //this.user.name = this.$route.params.username
                 this.user.profile_picture_path = ""
-                //this.user.cover_photo_path = "https://c1.staticflickr.com/7/6190/6149540877_e5cfd006c2_z.jpg"
             },
             async getDestinations() {
                 var url = this.baseurl + "destinations/user/" + this.user.id
@@ -109,35 +111,34 @@
                     .then(response => {
                         // JSON responses are automatically parsed.
                         this.destinations = response.data
-                        console.log(this.destinations)
                     })
                     .catch(e => {
                         this.errors.push(e)
                     })
                     this.formatDateTime();
-                    this.displayArray(this.destinations);
-                    this.countdown(this.destinations[1].date);
+                    if(this.destinations[1]){
+                        this.displayArray(this.destinations);
+                        this.countdown(this.destinations[1].date);
+                    }
                     this.getCurrentLocation(this.destinations[0].location);
-                this.$forceUpdate
             },
 
-            async getCurrentLocation(name) {
+            getCurrentLocation(name) {
                 var url = this.baseurl + "city/" + name
-                console.log(url)
-                await axios.get(url)
+                axios.get(url)
                     .then(response => {
                         // JSON responses are automatically parsed.
                         this.user.lat = response.data[0].lat
                         this.user.lon = response.data[0].lon
                         this.user.cover_photo_path = response.data[0].photo_url
                         this.user.current_location = response.data[0].name
-                        console.log(this.user)
+                        console.log(response.data)
                     })
                     .catch(e => {
                         this.errors.push(e)
                     })
-                    
-                this.$forceUpdate
+                    this.gotData = true
+                    this.$forceUpdate
             },
             countdown: function (timestamp) {
                 // Get todays date and time
@@ -192,18 +193,13 @@
 
 
         },
-        created() {
-            console.log(this.destinations)
-            this.$forceUpdate();
-            console.log(this.destinations[0].location)
-
-
-        },
         beforeMount() {
-            console.log(this.destinations)
             this.getUser(this.$route.params.userid);
-            this.getDestinations();
-            this.countdown(this.destinations[1].date);
+            this.getDestinations();           
+            if(this.destinations[1]){
+                this.countdown(this.destinations[1].date);
+            }
+            
         },
     }
 </script>
