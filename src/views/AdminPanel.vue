@@ -11,7 +11,7 @@
                   <v-text-field name="id" v-model="city.id" required></v-text-field>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-text-field label="City" name="city" v-model="city.name" required></v-text-field>
+                  <v-text-field label="City" name="city" v-model="city.city_name" required></v-text-field>
                 </v-col>
 
                 <v-col cols="12" md="2">
@@ -36,7 +36,7 @@
             <v-form @submit.prevent="addCity">
             <v-row>
               <v-col cols="12" md="2">
-                <v-text-field label="City" name="city" v-model="newCity.name" required></v-text-field>
+                <v-text-field label="City" name="city" v-model="newCity.city_name" required></v-text-field>
               </v-col>
 
               <v-col cols="12" md="2">
@@ -71,10 +71,10 @@
       user: Object,
     },
     data: () => ({
-      baseurl: "http://localhost:5345/",
+      baseurl: "http://localhost:5345/api/v1/",
       cities: [],
       newCity: {
-          name: "",
+          city_name: "",
           lat: "",
           lon: "",
           photo_url: ""
@@ -83,11 +83,10 @@
     }),
     methods: {
       getCities(){
-          axios.get(this.baseurl + "api/v1/cities")
+          axios.get(this.baseurl + "cities")
           .then(response => {
                         // JSON responses are automatically parsed
                         this.cities = response.data
-                        console.log(this.cities)
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -105,7 +104,6 @@
         }
         console.log(addDestination)
         */
-        console.log(this.newCity)
         
         axios.post(url, this.newCity)
         this.$forceUpdate
@@ -121,7 +119,6 @@
           time: city.time,
           id: city.id
         }
-        console.log("updating city")
         axios.post(url, updatedCity)
         this.$forceUpdate
       },
@@ -130,7 +127,6 @@
         var delCity = {
           id: city.id
         }
-        console.log("deleting city")
         axios.post(url, delCity)
         this.$forceUpdate
       },

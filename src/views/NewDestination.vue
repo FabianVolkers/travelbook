@@ -4,7 +4,7 @@
     
     <v-overlay v-if="overlay == true">
       <v-container>
-          <v-list-item two-line v-for="(destination, i) in destinations" :key="i">
+          <v-list-item two-line v-for="(destination, i) in user.destinations" :key="i">
             
             <v-list-item-content>
               <v-form @submit.prevent="editDestination(destination)">
@@ -72,12 +72,11 @@
   export default {
     name: 'NewDestination',
     props: {
-      destinations: Array,
       user: Object,
     },
     data: () => ({
       overlay: false,
-      baseurl: "http://localhost:5345/",
+      baseurl: "http://localhost:5345/api/v1/",
       newDestination: {
         city: "",
         datestring: "",
