@@ -1,5 +1,9 @@
 <template>
     <v-container fluid>
+        <v-row>
+            <v-col cols="0" md="1" lg="1">
+            </v-col>
+        <v-col cols="12" md="10" lg="10">
         <v-row id="title-row" no-gutters>
             <v-col cols="12">
                 <v-card class="mx-auto" width="100%">
@@ -56,6 +60,10 @@
                 </v-card>
             </v-col>
         </v-row>
+        </v-col>
+        <v-col cols="0" md="1" lg="1">
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
@@ -67,7 +75,7 @@
 
 
     export default {
-        //name: 'ProfileView',
+        name: 'ProfileView',
         props: {
             route: Object,
             user: Object,

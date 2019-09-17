@@ -2,9 +2,9 @@
   <div>
     <v-btn class="mr-4" @click="showOverlay">Edit</v-btn>
     
-    <v-overlay v-if="overlay == true">
+    <v-overlay v-if="overlay == true" style="overflow:scroll">
       <v-container>
-          <v-list-item two-line v-for="(destination, i) in user.destinations" :key="i">
+          <v-list-item two-line v-for="(destination, i) in activeUser.destinations" :key="i">
             
             <v-list-item-content>
               <v-form @submit.prevent="editDestination(destination)">
@@ -13,7 +13,7 @@
                   <v-text-field name="id" v-model="destination.id" required></v-text-field>
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-text-field label="City" name="city" type="city" v-model="destination.location" required></v-text-field>
+                  <v-text-field label="City" name="city" type="city" v-model="destination.city_name" required></v-text-field>
                 </v-col>
 
                 <v-col cols="12" md="3">
@@ -40,13 +40,11 @@
 
               <v-col cols="12" md="3">
                 <v-text-field label="Date" name="date" type="date" v-model="newDestination.date" required></v-text-field>
-                <div class="invalid-feedback">This field is required.</div>
               </v-col>
 
               <v-col cols="12" md="3">
                 <v-text-field label="Time" name="time" type="time" v-model="newDestination.time" required></v-text-field>
-                <div class="invalid-feedback">This field is required.</div>
-              </v-col>
+                </v-col>
               <v-col cols="12" md="3">
                 <v-btn type="submit" class="mr-4">Add Destination</v-btn>
               </v-col>
@@ -72,7 +70,7 @@
   export default {
     name: 'NewDestination',
     props: {
-      user: Object,
+      activeUser: Object,
     },
     data: () => ({
       overlay: false,
@@ -82,7 +80,8 @@
         datestring: "",
         time: "",
         userid: "",
-      }
+      },
+      //activeUser: {}
 
     }),
     methods: {
@@ -92,16 +91,7 @@
       addDestination(){
         var url = this.baseurl + 'destination/add'
         
-        /*
-        var addDestination = {
-          userid: this.user.id,
-          city: this.newDestination.city,
-          date: this.newDestination.date,
-          time: this.newDestination.time
-        }
-        console.log(addDestination)
-        */
-       this.newDestination.userid = this.user.id
+       this.newDestination.userid = this.activeUser.id
         console.log(this.newDestination)
         
         axios.post(url, this.newDestination)
@@ -139,7 +129,7 @@
       }
     },
     mounted() {
-
+      //this.activeUser = this.$session.get("user")
     }
   }
 </script>
