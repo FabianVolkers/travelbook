@@ -1,9 +1,31 @@
 <template>
     <v-container fluid>
-        <v-row id="title-row" no-gutters>
-            <v-col cols="12" md="4" lg="4">
+        <v-row id="title-row">
+            <v-col cols="12" md="8" lg="8" order-md="12">
+                <v-row id="image-row">
+                    <v-col cols="12">
+                        <v-card>
+                            <v-img id="cover-photo" class="white--text" v-bind:src="'https://www.happyviaggithailandia.com/app/public/upload/CAMBOGIA/Koh%20Rong%20Samloem/2.jpg'"></v-img>
+                        </v-card>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="12">
+                        <v-card>
+                            <v-card-title>Map</v-card-title>
+                            <div id="map" class="map"></div>
+                        </v-card>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="12">
+
+                    </v-col>
+                </v-row>
+            </v-col>
+            <v-col cols="12" md="4" lg="4" order-md="1">
                 <v-card>
-                    <v-card-title>{{ user.user_name }}'s Friends</v-card-title>
+                    <v-card-title>{{ activeUser.user_name }}'s Friends</v-card-title>
                     <v-list>
                         <v-list-item-group color="primary">
                             <v-list-item two-line v-for="(friend, i) in renderArray" :key="i">
@@ -25,7 +47,7 @@
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle v-if="!friend.destinations[1].datestring"
                                                 v-html="friend.destinations[1].city_name"></v-list-item-subtitle>
-                                            <v-btn :href="'/%23/friends/user/' + friend.user_id">Profile</v-btn>
+                                            <v-btn :href="'/#/profile/user/' + friend.user_id">Profile</v-btn>
                                         </v-col>
                                     </v-row>
                                 </v-list-item-content>
@@ -35,39 +57,7 @@
                 </v-card>
             </v-col>
 
-            <v-col cols="12" md="8" lg="8">
-                <v-row>
-                    <v-col cols="12">
-                        <v-card>
-                            <v-card-title>Map</v-card-title>
-                            <div id="map"></div>
-                        </v-card>
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <v-card class="mt-4 mx-auto" max-width="100%">
-                            <v-sheet class="v-sheet--offset mx-auto" color="none" elevation="12"
-                                max-width="calc(100% - 32px)">
-                                <v-sparkline v-for="(friend, i) in friends" :key="i" :labels="labels" radius="10"
-                                    :value="friend.distances" color="black" line-width="2" padding="16">
-                                </v-sparkline>
-                                <v-sparkline :labels="labels" :value="value" style="position:absolute" :smooth="10"
-                                    color="black" line-width="0.5" padding="16">
-                                </v-sparkline>
-                                <v-sparkline :value="value2" style="position:absolute" color="cyan" :smooth="10"
-                                    line-width="0.5" padding="16">
-                                </v-sparkline>
-                            </v-sheet>
-
-                            <v-card-text class="pt-0">
-                                <div class="title font-weight-light mb-2">Distance Plot</div>
-                            </v-card-text>
-                        </v-card>
-
-                    </v-col>
-                </v-row>
-            </v-col>
+            
         </v-row>
 
     </v-container>
@@ -79,22 +69,14 @@
     import Map from 'ol/Map';
     import View from 'ol/View';
     import TileLayer from 'ol/layer/Tile';
-    import XYZ from 'ol/source/XYZ';
+    import OSM from 'ol/source/OSM.js';
+    import {
+        fromLonLat
+    } from 'ol/proj.js';
+    import Feature from 'ol/Feature';
+    import Polygon from 'ol/geom/Polygon';
+    import Point from 'ol/geom/Point';
 
-    new Map({
-        target: 'map',
-        layers: [
-            new TileLayer({
-                source: new XYZ({
-                    url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                })
-            })
-        ],
-        view: new View({
-            center: [0, 0],
-            zoom: 2
-        })
-    });
 
     export default {
         name: 'Friends',
@@ -103,48 +85,23 @@
             route: Object,
         },
         data: () => ({
+            activeUser: {},
             destinations: [],
             friends: [],
             renderArray: [],
             baseurl: "http://localhost:5345/api/v1/",
-            labels: ["1", "2", "3", "4", "5", "6", "7", "8"],
-            value: [
-                200,
-                675,
-                410,
-                390,
-                310,
-                460,
-                250,
-                240,
-            ],
-            value2: [
-                400,
-                375,
-                610,
-                190,
-                135,
-                540,
-            ],
-            colours: [
-                "red",
-                "cyan",
-                "",
-                "",
-            ]
+
         }),
         methods: {
             getFriends(userid) {
-                var url = this.baseurl + "friends/user/" + userid
-                var result = {}
+                var url = this.baseurl + "destinations/friends/user/" + userid
                 axios.get(url)
                     .then(response => {
                         // JSON responses are automatically parsed.
                         this.destinations = response.data
-                        //console.log(this.friends)
                         this.destinations = this.formatDateTime(this.destinations)
                         this.displayArray(this.destinations)
-                        this.calculateDistances()
+                        //this.calculateDistances()
 
                     })
                     .catch(e => {
@@ -152,21 +109,41 @@
                     })
 
             },
+            loadMap() {
+                
+
+                new Map({
+                    target: 'map',
+                    layers: [
+                        new TileLayer({
+                            preload: 4,
+                            source: new OSM()
+                        }),
+    
+                    ],
+                    view: new View({
+                        center: [0, 0],
+                        zoom: 2,
+                        //projection: mercator,
+                    })
+                });
+            }
+
+
+            ,
             displayArray(destinations) {
 
 
                 var i = 0
-                var j = 0
                 while (i <= destinations.length) {
                     var friend = {}
-                    friend.destinations = []
                     friend.name = destinations[i].user_name
                     friend.user_id = destinations[i].user_id
+                    this.friends.push(friend)
+                    friend.destinations = []
                     while (destinations[i].user_name == friend.name) {
 
                         friend.destinations.push(destinations[i])
-                        //console.log(friend)
-                        //console.log(JSON.stringify(friend.destinations))
                         if (!destinations[i + 1] || destinations[i + 1].user_name != friend.name) {
                             if (destinations[i - 1].user_name != friend.name) {
                                 var nextDestination = {}
@@ -175,16 +152,15 @@
                                 friend.destinations.push(nextDestination)
 
                             }
-                            console.log(friend)
                             this.renderArray.push(friend)
-                            console.log(this.renderArray)
                         }
-                        j++;
                         i++;
                     }
 
 
                 }
+                this.$session.set("friends", this.friends)
+                console.log(this.$session.getAll())
 
             },
             formatDateTime(destinations) {
@@ -216,6 +192,7 @@
                     now.setDate(now.getDate() + 7);
                 }
             },
+            /*
             calculateDistances() {
                 console.log("Calculating Distances")
                 this.friends = this.renderArray
@@ -248,16 +225,20 @@
 
             },
             getDistance(lat, lon) {
-                var distance = Math.sqrt(Math.pow(Number(lat) - Number(this.user.current_location.lat), 2) * Math.pow(
-                    Number(lon) - Number(this.user.current_location.lon), 2))
+                var distance = Math.sqrt(Math.pow(Number(lat) - Number(this.activeUser.current_location.lat), 2) * Math.pow(
+                    Number(lon) - Number(this.activeUser.current_location.lon), 2))
                 return distance;
+            },
+            */
+            getSessionUser() {
+                this.activeUser = this.$session.get("user")
             }
             /*
                         calculateDistances(friends) {
                             friends.distances = []
                             for(i in friends.destinations){
                                 for(j in friends[i].destinations){
-                                    friends[i].distances.push(Math.sqrt(Math.pow(Number(friends[i].destinations[j].lat) - Number(this.user.current_location.lat), 2) * Math.pow(Number(friends[i].destinations[j].lon) - Number(this.user.current_location.lon) , 2)))
+                                    friends[i].distances.push(Math.sqrt(Math.pow(Number(friends[i].destinations[j].lat) - Number(this.activeUser.current_location.lat), 2) * Math.pow(Number(friends[i].destinations[j].lon) - Number(this.activeUser.current_location.lon) , 2)))
                                 }
                                 console.log(friends[i].distances)
                             }
@@ -265,14 +246,35 @@
                         }
             */
         },
+        beforeCreate: function () {
+
+            if (!this.$session.exists()) {
+                if (this.$router.currentRoute.name != "login") {
+                    this.$router.push({
+                        name: "login",
+                        query: {
+                            redirect: this.$router.currentRoute.name
+                        }
+                    });
+                }
+            }
+        },
+
         beforeMount() {
             //this.getUser(this.$route.params.userid)
-            this.getFriends(this.user.user_id)
+            this.getFriends(this.activeUser.user_id)
 
 
         },
+        mounted() {
+            this.loadMap()
+        },
         created() {
-            this.distancesView()
+            if (this.$session.exists()) {
+                this.getSessionUser()
+            }
+
+            //this.distancesView()
         }
     }
 </script>
@@ -280,5 +282,8 @@
     #map {
         width: 100%;
         height: 100%;
+    }
+    #cover-photo {
+        height: 18vh;
     }
 </style>

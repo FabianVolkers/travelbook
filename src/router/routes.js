@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import ProfileView from '../views/ProfileView'
+import UserSettings from '../views/UserSettings'
 import Friends from '../views/Friends'
-import AdminPanel from '../views/AdminPanel'
+//import AdminPanel from '../views/AdminPanel'
+import Cities from '../views/Cities'
+import Users from '../views/Users'
 import Login from '../views/Login'
 import Home from '../views/Home'
 
@@ -10,12 +13,6 @@ Vue.use(Router)
 
 export default new Router({
     routes: [
-        {
-            path: '/',
-            redirect: {
-                name: "home"
-            }
-        },
         {
             path: "/login",
             name: "login",
@@ -27,13 +24,18 @@ export default new Router({
             component: Home,
         },
         {
-            path: "/user/:userid/:username",
+            path: "/profile/user/:userid",
             name: "profile",
             component: ProfileView,
             props: true,
         },
         {
-            path: "/friends/user/:userid/",
+            path: "/settings",
+            name: "settings",
+            component: UserSettings,
+        },
+        {
+            path: "/friends",
             name: "friends",
             component: Friends,
             props: true,
@@ -41,7 +43,17 @@ export default new Router({
         {
             path: "/admin",
             name: "admin",
-            component: AdminPanel,
+            component: Cities,
+        },
+        {
+        path: "/cities",
+            name: "cities",
+            component: Cities,
+        },
+        {
+        path: "/users",
+            name: "users",
+            component: Users,
         }
     ]
 })

@@ -3,74 +3,76 @@
         <v-row>
             <v-col cols="0" md="1" lg="1">
             </v-col>
-        <v-col cols="12" md="10" lg="10">
-        <v-row id="title-row" no-gutters>
-            <v-col cols="12">
-                <v-card class="mx-auto" width="100%">
-                    <v-img id="cover-photo" class="white--text" v-bind:src="user.current_location.photo_url">
-                        <v-card-title class="align-end fill-height">{{ user.user_name }}'s Travels!</v-card-title>
-                    </v-img>
+            <v-col cols="12" md="10" lg="10">
+                <v-row id="title-row" no-gutters>
+                    <v-col cols="12">
+                        <v-card class="mx-auto" width="100%">
+                            <v-img id="cover-photo" class="white--text" v-bind:src="user.current_location.photo_url">
+                                <v-card-title class="align-end fill-height">{{ user.user_name }}'s Travels!
+                                </v-card-title>
+                            </v-img>
 
-                </v-card>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col cols="12" sm="4" xs="12" order="12" order-md="1" order-lg="1">
-                <!--<UpcomingDestinations v-bind:user="this.user" v-bind:destinations="destinations" />-->
-
-                <v-row align="center">
-
-                    <v-card class="mx-auto" tile>
-                        <v-card-title>{{ user.user_name }}'s Upcoming Destinations</v-card-title>
-                        <v-list>
-                            <v-list-item-group color="primary">
-                                <v-list-item>
-                                    <v-list-item-content v-if="user.destinations[1]">
-                                        <v-list-item-title v-html="user.destinations[1].city_name"></v-list-item-title>
-                                        <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
-                                    </v-list-item-content>
-                                    <v-list-item-content v-if="!user.destinations[1]">
-                                        <v-list-item-title>No upcoming destinations</v-list-item-title>
-                                        <v-list-item-subtitle></v-list-item-subtitle>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list-item-group>
-                            <v-list-item-group v-if="upcoming" color="primary">
-                                <v-list-item two-line v-for="(destination, i) in upcoming" :key="i">
-                                    <v-list-item-content>
-                                        <v-list-item-title v-html="destination.city_name"></v-list-item-title>
-                                        <v-list-item-subtitle v-html="destination.datestring"></v-list-item-subtitle>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list-item-group>
-                        </v-list>
-
-                        <NewDestination v-bind:user="user" />
-                    </v-card>
+                        </v-card>
+                    </v-col>
                 </v-row>
+                <v-row v-if="friendship">
+                    <v-col cols="12" sm="4" xs="12" order="12" order-md="1" order-lg="1">
+                        <!--<UpcomingDestinations v-bind:user="this.user" v-bind:destinations="destinations" />-->
 
-            </v-col>
-            <v-col cols="12" sm="8" xs="12" order="1" order-md="12" order-lg="12">
-                <v-card class="mx-auto">
-                    <v-card-title>{{ user.user_name }} is in {{ user.current_location.city_name }}</v-card-title>
-                    <iframe id="map" frameborder="0" marginheight="0" marginwidth="0"
-                        v-bind:src="'https://www.openstreetmap.org/export/embed.html?bbox=' + (user.current_location.lon-9) + '%2C' + (user.current_location.lat-6) + '%2C' + (user.current_location.lon+9) + '%2C' + (user.current_location.lat+6) + '&amp;layer=mapnik&amp;marker=' + user.current_location.lat + '%2C' + user.current_location.lon">
-                    </iframe>
+                        <v-row align="center">
 
-                </v-card>
+                            <v-card class="mx-auto" tile>
+                                <v-card-title>{{ user.user_name }}'s Upcoming Destinations</v-card-title>
+                                <v-list>
+                                    <v-list-item-group color="primary">
+                                        <v-list-item>
+                                            <v-list-item-content v-if="user.destinations[1]">
+                                                <v-list-item-title v-html="user.destinations[1].city_name">
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
+                                            </v-list-item-content>
+                                            <v-list-item-content v-if="!user.destinations[1]">
+                                                <v-list-item-title>No upcoming destinations</v-list-item-title>
+                                                <v-list-item-subtitle></v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list-item-group>
+                                    <v-list-item-group v-if="upcoming" color="primary">
+                                        <v-list-item two-line v-for="(destination, i) in upcoming" :key="i">
+                                            <v-list-item-content>
+                                                <v-list-item-title v-html="destination.city_name"></v-list-item-title>
+                                                <v-list-item-subtitle v-html="destination.datestring">
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list-item-group>
+                                </v-list>
+
+                            </v-card>
+                        </v-row>
+
+                    </v-col>
+                    <v-col cols="12" sm="8" xs="12" order="1" order-md="12" order-lg="12">
+                        <v-card class="mx-auto">
+                            <v-card-title>{{ user.user_name }} is in {{ user.current_location.city_name }}
+                            </v-card-title>
+                            <iframe id="map" frameborder="0" marginheight="0" marginwidth="0"
+                                v-bind:src="'https://www.openstreetmap.org/export/embed.html?bbox=' + (user.current_location.lon-9) + '%2C' + (user.current_location.lat-6) + '%2C' + (user.current_location.lon+9) + '%2C' + (user.current_location.lat+6) + '&amp;layer=mapnik&amp;marker=' + user.current_location.lat + '%2C' + user.current_location.lon">
+                            </iframe>
+
+                        </v-card>
+                    </v-col>
+                </v-row>
+                <v-row v-if="!friendship">
+                </v-row>
             </v-col>
-        </v-row>
-        </v-col>
-        <v-col cols="0" md="1" lg="1">
+            <v-col cols="0" md="1" lg="1">
             </v-col>
         </v-row>
     </v-container>
 </template>
 
 <script>
-    //import UpcomingDestinations from '../components/UpcomingDestinations'
-    import NewDestination from '../views/NewDestination'
-
     import axios from 'axios'
 
 
@@ -78,18 +80,17 @@
         name: 'ProfileView',
         props: {
             route: Object,
-            user: Object,
+            //user: Object,
         },
-        components: {
-            //UpcomingDestinations,
-            NewDestination
-        },
+        components: {},
         data: () => ({
             baseurl: 'http://127.0.0.1:5345/api/v1/',
             interval: "",
+            activeUser: {},
+            user: {},
+            friendship: false,
             countdownString: "loading countdown",
             upcoming: [],
-            overlay: false,
             day: "",
             time: "",
         }),
@@ -127,7 +128,51 @@
         },
         */
         methods: {
-            
+
+            async getFriends(userid) {
+                var url = this.baseurl + "friends/user/" + userid
+                await axios.get(url)
+                    .then(response => {
+                        // JSON responses are automatically parsed.
+                        this.friends = response.data
+                        this.$session.set("friends", friends)
+                        console.log(this.$session.getAll())
+                        //this.calculateDistances()
+
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+
+            },
+
+            async getUser(userID) {
+                var url = this.baseurl + "profile/user/" + userID
+
+                await axios.get(url)
+                    .then(response => {
+                        this.user = response.data
+                        if (this.$session.exists()) {
+                            this.getSessionUser()
+                            this.friends = this.$session.get("friends")
+                            console.log(this.friends)
+                            if (!this.friends) {
+                                this.getFriends(this.activeUser.user_id)
+                            }
+                            this.checkFriendship(userID)
+                        }
+
+                        if (this.user.destinations[1]) {
+                            this.countdown(this.user.destinations[1].date);
+                            //this.displayArray(this.user.destinations)
+                        }
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+
+            },
+
             countdown: function (timestamp) {
                 // Get todays date and time
                 var x = setInterval(function () {
@@ -179,15 +224,36 @@
                     i = "0" + i
                 }
                 return i;
-            }
+            },
+            getSessionUser() {
+                this.activeUser = this.$session.get("user")
+            },
 
+            checkFriendship(user_id) {
+                if (this.friends.includes(user_id)) {
+                    this.friendship = true
+                }
+            }
 
         },
-        created() {
-            if (this.user.destinations[1]) {
-                this.countdown(this.user.destinations[1].date);
-                //this.displayArray(this.user.destinations)
+        beforeCreate: function () {
+            if (!this.$session.exists()) {
+                if (this.$router.currentRoute.name != "login") {
+                    this.$router.push({
+                        name: "login",
+                        query: {
+                            redirect: this.$route.name,
+                            user_id: this.$route.params.userid
+                        }
+                    });
+                }
             }
+        },
+        beforeMount() {
+           
+        },
+        created() {
+            this.getUser(this.$route.params.userid)
         },
         mounted() {
             this.formatDateTime()

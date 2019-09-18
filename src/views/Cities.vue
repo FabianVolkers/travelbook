@@ -1,6 +1,6 @@
 <template>
       <v-container>
-          <h1>AdminPanel</h1>
+          <h1>Manage Cities</h1>
       
           <v-list-item two-line v-for="city in cities" :key="city.id">
             
@@ -57,7 +57,7 @@
            </v-form>
 
         </v-list-item-content>
-      </v-list-item>-
+      </v-list-item>
       </v-container>
 </template>
 
@@ -65,7 +65,7 @@
   import axios from 'axios'
 
   export default {
-    name: 'AdminPanel',
+    name: 'Cities',
     props: {
       destinations: Array,
       user: Object,
@@ -94,16 +94,6 @@
       },
       addCity(){
         var url = this.baseurl + 'city/add'
-        
-        /*
-        var addDestination = {
-          userid: this.user.id,
-          city: this.newDestination.city,
-          date: this.newDestination.date,
-          time: this.newDestination.time
-        }
-        console.log(addDestination)
-        */
         
         axios.post(url, this.newCity)
         this.$forceUpdate
@@ -136,6 +126,16 @@
         }
         return i;
       }
+    },
+    beforeCreate: function () {
+      if (!this.$session.exists()) {
+          if(this.$router.currentRoute.name != "login"){
+          this.$router.push({
+          name: "login",
+          query: { redirect: this.$router.currentRoute.name }
+        });
+          }
+        }
     },
     mounted() {
         this.getCities()

@@ -92,7 +92,6 @@
         var url = this.baseurl + 'destination/add'
         
        this.newDestination.userid = this.activeUser.id
-        console.log(this.newDestination)
         
         axios.post(url, this.newDestination)
         this.$forceUpdate
@@ -108,7 +107,6 @@
           time: destination.time,
           id: destination.id
         }
-        console.log("updating destination")
         axios.post(url, newDestination)
         this.$forceUpdate
       },
@@ -117,7 +115,6 @@
         var newDestination = {
           id: destination.id
         }
-        console.log("deleting destination")
         axios.post(url, newDestination)
         this.$forceUpdate
       },

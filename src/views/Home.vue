@@ -4,7 +4,7 @@
             <v-col cols="0" md="1" lg="1">
             </v-col>
             <v-col cols="12" md="10" lg="10">
-                <v-row id="title-row" no-gutters>
+                <v-row id="title-row">
                     <v-col cols="12">
                         <v-card class="mx-auto" width="100%">
                             <v-img id="cover-photo" class="white--text" v-bind:src="activeUser.current_location.photo_url">
@@ -185,23 +185,22 @@
                 }
                 return i;
             },
-            checkLogin() {
-                    this.getSessionUser()
-            },
             getSessionUser() {
-                console.log(this.$session.get("user"))
                 this.activeUser = this.$session.get("user")
             }
             
 
         },
-        beforeCreate() {
-            if (!this.$session.exists()) {
-                    this.$router.replace({
-                        name: "login"
-                    });
-                }
-        },
+        beforeCreate: function () {
+      if (!this.$session.exists()) {
+          if(this.$router.currentRoute.name != "login"){
+          this.$router.push({
+          name: "login",
+          query: { redirect: this.$router.currentRoute.name }
+        });
+          }
+        }
+    },
         created() {
             if(this.$session.exists()){
                 this.getSessionUser()
