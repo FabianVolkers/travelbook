@@ -121,7 +121,7 @@
             },
         },
         beforeCreate: function () {
-      if (!this.$session.exists() || !this.session.get("user").admin_status) {
+      if (!this.$session.exists() || !this.$session.get("user").admin_status) {
           if(this.$router.currentRoute.name != "login"){
           this.$router.push({
           name: "login",

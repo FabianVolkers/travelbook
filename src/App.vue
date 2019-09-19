@@ -9,7 +9,8 @@
         <v-toolbar-items v-if="$router.currentRoute.name != 'login'">
           <v-btn color="white" text @click="$router.push({name: 'home'})">Home</v-btn>
           <v-btn color="white" text @click="$router.push({name: 'friends'})">Friends</v-btn>
-          <v-menu offset-y> <!--- v-if="activeUser.admin_status == 1"--->
+          
+          <v-menu offset-y v-if="activeUser.admin_status == 1"> <!--- v-if="activeUser.admin_status == 1"--->
       <template v-slot:activator="{ on }">
         <v-btn color="white" text v-on="on">
           Admin
@@ -109,7 +110,7 @@
         await axios.get(url)
           .then(response => {
             this.activeUser = response.data
-            this.$session.set("userObj", this.activeUser)
+            this.$session.set("user", this.activeUser)
             return this.activeUser
           })
           .catch(e => {

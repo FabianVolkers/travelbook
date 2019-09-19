@@ -64,6 +64,15 @@
                     </v-col>
                 </v-row>
                 <v-row v-if="!friendship">
+                    <v-col cols="0" md="2"></v-col>
+                    <v-col cols="12" md="8">
+                        <v-card id="no-friendship">
+                            <v-icon large>mdi-lock-outline</v-icon>
+                            <v-card-text>{{  user.user_name  }}'s profile is set to private.</v-card-text>
+                            <v-btn color="secondary">Send Friend Request</v-btn>
+                        </v-card>
+                    </v-col>
+                    <v-col cols="0" md="2"></v-col>
                 </v-row>
             </v-col>
             <v-col cols="0" md="1" lg="1">
@@ -74,7 +83,6 @@
 
 <script>
     import axios from 'axios'
-
 
     export default {
         name: 'ProfileView',
@@ -87,7 +95,11 @@
             baseurl: 'http://127.0.0.1:5345/api/v1/',
             interval: "",
             activeUser: {},
-            user: {},
+            user: {
+                current_location: {
+                    photo_url: "",
+                },
+            },
             friendship: false,
             countdownString: "loading countdown",
             upcoming: [],
@@ -129,14 +141,31 @@
         */
         methods: {
 
-            async getFriends(userid) {
-                var url = this.baseurl + "friends/user/" + userid
+            checkFriendship(profileID) {
+                //user_id == route.params.userid
+                var i = 0
+                for( i in this.friends ){
+                    if (this.friends[i].id == profileID){
+                        this.friendship = true
+                    }
+                }
+            },
+
+            async getFriends(activeID, profileID) {
+                //userid == activeUser.user_id
+                var url = this.baseurl + "friends/user/" + activeID
                 await axios.get(url)
                     .then(response => {
-                        // JSON responses are automatically parsed.
                         this.friends = response.data
-                        this.$session.set("friends", friends)
-                        console.log(this.$session.getAll())
+                        //this.$session.set("friends", friends)
+                        this.checkFriendship(profileID)
+                        if(this.friendship){
+                            if (this.user.destinations.length > 1) {
+                            this.countdown(this.user.destinations[1].date);
+                            this.displayArray(this.user.destinations)
+                        }
+                        
+            }
                         //this.calculateDistances()
 
                     })
@@ -146,20 +175,18 @@
 
             },
 
-            async getUser(userID) {
-                var url = this.baseurl + "profile/user/" + userID
+            async getUser(profileID) {
+                //userID == route.params.userid
+                var url = this.baseurl + "profile/user/" + profileID
 
                 await axios.get(url)
                     .then(response => {
                         this.user = response.data
                         if (this.$session.exists()) {
                             this.getSessionUser()
-                            this.friends = this.$session.get("friends")
-                            console.log(this.friends)
-                            if (!this.friends) {
-                                this.getFriends(this.activeUser.user_id)
-                            }
-                            this.checkFriendship(userID)
+                            //this.friends = this.$session.get("friends")
+                            this.getFriends(this.activeUser.user_id, profileID)
+                            
                         }
 
                         if (this.user.destinations[1]) {
@@ -229,12 +256,6 @@
                 this.activeUser = this.$session.get("user")
             },
 
-            checkFriendship(user_id) {
-                if (this.friends.includes(user_id)) {
-                    this.friendship = true
-                }
-            }
-
         },
         beforeCreate: function () {
             if (!this.$session.exists()) {
@@ -253,14 +274,11 @@
            
         },
         created() {
-            this.getUser(this.$route.params.userid)
+            
         },
         mounted() {
+            this.getUser(this.$route.params.userid)
             this.formatDateTime()
-            if (this.user.destinations[1]) {
-                this.countdown(this.user.destinations[1].date);
-                this.displayArray(this.user.destinations)
-            }
         },
     }
 </script>
@@ -274,6 +292,12 @@
 
     #title-row h1 {
         justify-self: end;
+    }
+
+    #no-friendship {
+        height: 55vh;
+        text-align: center;
+        padding-top: 18vh;
     }
 
     #map {

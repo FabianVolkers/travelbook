@@ -65,13 +65,6 @@
 
 <script>
     import axios from 'axios'
-    import {
-        mdiEye
-    } from '@mdi/js';
-    import {
-        mdiEyeOff
-    } from '@mdi/js';
-
 
     export default {
         name: 'Login',

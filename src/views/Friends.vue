@@ -102,7 +102,6 @@
                         this.destinations = this.formatDateTime(this.destinations)
                         this.displayArray(this.destinations)
                         //this.calculateDistances()
-
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -142,7 +141,6 @@
                     this.friends.push(friend)
                     friend.destinations = []
                     while (destinations[i].user_name == friend.name) {
-
                         friend.destinations.push(destinations[i])
                         if (!destinations[i + 1] || destinations[i + 1].user_name != friend.name) {
                             if (destinations[i - 1].user_name != friend.name) {
@@ -150,17 +148,16 @@
                                 nextDestination.city_name = "No upcoming destinations"
                                 nextDestination.date = ""
                                 friend.destinations.push(nextDestination)
-
                             }
                             this.renderArray.push(friend)
+                            this.$session.set("friends", this.friends)
+                            console.log(this.$session.getAll())
                         }
                         i++;
-                    }
-
-
+                    }   
+                
                 }
-                this.$session.set("friends", this.friends)
-                console.log(this.$session.getAll())
+                
 
             },
             formatDateTime(destinations) {
