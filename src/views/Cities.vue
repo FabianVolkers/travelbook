@@ -71,7 +71,7 @@
       user: Object,
     },
     data: () => ({
-      baseurl: "http://localhost:5345/api/v1/",
+      baseurl: "https://fabiserv.uber.space/api/v1/",
       cities: [],
       newCity: {
           city_name: "",

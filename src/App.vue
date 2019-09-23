@@ -10,7 +10,7 @@
           <v-btn color="white" text @click="$router.push({name: 'home'})">Home</v-btn>
           <v-btn color="white" text @click="$router.push({name: 'friends'})">Friends</v-btn>
           
-          <v-menu offset-y v-if="activeUser.admin_status == 1"> <!--- v-if="activeUser.admin_status == 1"--->
+          <v-menu offset-y v-if="activeUser.admin_status"> <!--- v-if="activeUser.admin_status == 1"--->
       <template v-slot:activator="{ on }">
         <v-btn color="white" text v-on="on">
           Admin
@@ -80,7 +80,7 @@
     data: () => ({
       //
       authenticated: false,
-      baseurl: 'http://127.0.0.1:5345/api/v1/',
+      baseurl: 'https://fabiserv.uber.space/api/v1/',
       user: {},
       tab: 0,
       activeUser: {}

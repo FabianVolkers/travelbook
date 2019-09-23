@@ -4,14 +4,18 @@
             <v-col cols="0" md="1" lg="1">
             </v-col>
             <v-col cols="12" md="10" lg="10">
-                <v-row id="title-row">
+                <v-row id="title-row" no-gutters>
                     <v-col cols="12">
-                        <v-card class="mx-auto" width="100%">
+                        <v-card class="mx-auto" width="100%" v-if="activeUser.current_location">
                             <v-img id="cover-photo" class="white--text" v-bind:src="activeUser.current_location.photo_url">
                                 <v-card-title class="align-end fill-height">Welcome Back, {{ activeUser.user_name }}! Enjoy
                                     your time in {{  activeUser.current_location.city_name }}</v-card-title>
                             </v-img>
-
+                        </v-card>
+                        <v-card class="mx-auto" width="100%" v-if="!activeUser.current_location">
+                            <v-img id="cover-photo" class="white--text" v-bind:src="bannerPlaceholder">
+                                <v-card-title class="align-end fill-height">Welcome, {{ activeUser.user_name }}!</v-card-title>
+                            </v-img>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -26,12 +30,12 @@
                                 <v-list>
                                     <v-list-item-group color="primary">
                                         <v-list-item>
-                                            <v-list-item-content v-if="activeUser.destinations[1]">
-                                                <v-list-item-title v-html="activeUser.destinations[1].city_name">
+                                            <v-list-item-content v-if="activeUser.nextDestination">
+                                                <v-list-item-title v-html="activeUser.nextDestination.city_name">
                                                 </v-list-item-title>
                                                 <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
                                             </v-list-item-content>
-                                            <v-list-item-content v-if="!activeUser.destinations[1]">
+                                            <v-list-item-content v-if="!activeUser.destinations || !activeUser.destinations[i]">
                                                 <v-list-item-title>No upcoming destinations</v-list-item-title>
                                                 <v-list-item-subtitle></v-list-item-subtitle>
                                             </v-list-item-content>
@@ -55,12 +59,14 @@
                     </v-col>
                     <v-col cols="12" sm="8" xs="12" order="1" order-md="12" order-lg="12">
                         <v-card class="mx-auto">
-                            <v-card-title>{{ activeUser.current_location.city_name }}
+                            <v-card-title v-if="activeUser.current_location">{{ activeUser.current_location.city_name }}
                             </v-card-title>
+                            <!--
                             <iframe id="map" frameborder="0" marginheight="0" marginwidth="0"
                                 v-bind:src="'https://www.openstreetmap.org/export/embed.html?bbox=' + (activeUser.current_location.lon-9) + '%2C' + (activeUser.current_location.lat-6) + '%2C' + (activeUser.current_location.lon+9) + '%2C' + (activeUser.current_location.lat+6) + '&amp;layer=mapnik&amp;marker=' + activeUser.current_location.lat + '%2C' + activeUser.current_location.lon">
                             </iframe>
-
+-->
+                            <MapComponent v-bind:users="users"/>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -74,9 +80,9 @@
 <script>
     //import UpcomingDestinations from '../components/UpcomingDestinations'
     import NewDestination from './NewDestination'
+    import MapComponent from '../components/Map'
 
     import axios from 'axios'
-
 
     export default {
         name: 'Home',
@@ -86,53 +92,24 @@
         },
         components: {
             //UpcomingDestinations,
-            NewDestination
+            NewDestination,
+            MapComponent
         },
         data: () => ({
-            baseurl: 'http://127.0.0.1:5345/api/v1/',
+            baseurl: 'https://fabiserv.uber.space/api/v1/',
             interval: "",
             countdownString: "loading countdown",
-            upcoming: [],
+            upcoming: null,
             overlay: false,
             day: "",
             time: "",
-            activeUser: {}
+            activeUser: {},
+            users: [],
+            bannerPlaceholder: 'https://s3.amazonaws.com/zweb-s3.uploads/ez2/wp-content/uploads/2018/01/iStock-534661459-copy.jpg'
         }),
-        /*
-        computed: {
-            countdownString: function () {
-                // Get todays date and time
-                var countdownString = "loading Countdown";
-                var x = setInterval(function () {
-                    var now = new Date().getTime();
 
-                    var countdownTime = new Date(this.user.current_location.date);
-
-                    // Find the distance between now and the count down date
-                    var distance = countdownTime - now;
-
-                    // Time calculations for days, hours, minutes and seconds
-                    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    // return countdown string
-                    //var countdownString
-                    if (distance < 0) {
-                        countdownString = "Expired"
-                    } else {
-                        countdownString = days + " days " + hours + " hours " + minutes + " minutes " +
-                            seconds +
-                            " seconds ";
-                    }
-                    return countdownString
-                }.bind(this), 1000)
-            },
-        },
-        */
         methods: {
-
+            
             countdown: function (timestamp) {
                 // Get todays date and time
                 var x = setInterval(function () {
@@ -162,9 +139,20 @@
             },
 
             displayArray: function (destinationsArray) {
-                this.upcoming = destinationsArray.slice();
-                this.upcoming.shift();
-                this.upcoming.shift();
+                var i = 0
+                var now = new Date()
+                
+                for (i in destinationsArray) {
+                    var date = new Date(destinationsArray[i].date)
+                    if(date > now && !this.upcoming){
+                        this.activeUser.nextDestination = destinationsArray[i]
+                        this.upcoming = destinationsArray.slice(Number(i) + 1)
+                        this.countdown(this.activeUser.nextDestination.date)                        
+                    }
+                }
+                ;
+                //this.upcoming.shift();
+                //this.upcoming.shift();
             },
             formatDateTime() {
                 var i = 0
@@ -187,6 +175,8 @@
             },
             getSessionUser() {
                 this.activeUser = this.$session.get("user")
+                this.users.push(this.activeUser)
+                //console.log(this.activeUser)
             }
             
 
@@ -204,17 +194,17 @@
         created() {
             if(this.$session.exists()){
                 this.getSessionUser()
+                
             }
-            if (this.activeUser.destinations[1]) {
-                this.countdown(this.activeUser.destinations[1].date);
-                //this.displayArray(this.activeUser.destinations)
-            }
+            
         },
         mounted() {
             this.formatDateTime()
-            if (this.activeUser.destinations[1]) {
-                this.countdown(this.activeUser.destinations[1].date);
-                this.displayArray(this.activeUser.destinations)
+            if (this.activeUser.destinations) {
+                if (this.activeUser.destinations[1]){
+                    this.displayArray(this.activeUser.destinations)
+                }
+                
             }
         },
     }
@@ -232,13 +222,12 @@
     }
 
     #map {
-        padding: 10px 10px 10px 10px;
         width: 100%;
-        min-height: 30vh;
+        height: 100%;
     }
 
     #cover-photo {
-        height: 10vh;
+        height: 30vh;
     }
 
     @media screen and (min-width: 500px) {
@@ -247,8 +236,8 @@
         }
 
         #cover-photo {
-            height: 30vh;
-        }
+        height: 30vh;
+    }
 
         #map {
             min-height: 50vh;

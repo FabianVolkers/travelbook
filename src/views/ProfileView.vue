@@ -6,12 +6,17 @@
             <v-col cols="12" md="10" lg="10">
                 <v-row id="title-row" no-gutters>
                     <v-col cols="12">
-                        <v-card class="mx-auto" width="100%">
+                        <v-card class="mx-auto" width="100%" v-if="user.current_location && friendship">
                             <v-img id="cover-photo" class="white--text" v-bind:src="user.current_location.photo_url">
                                 <v-card-title class="align-end fill-height">{{ user.user_name }}'s Travels!
                                 </v-card-title>
                             </v-img>
 
+                        </v-card>
+                        <v-card class="mx-auto" width="100%" v-if="!user.current_location || !friendship">
+                            <v-img id="cover-photo" class="white--text" v-bind:src="bannerPlaceholder">
+                                <v-card-title class="align-end fill-height">{{ user.user_name }}!</v-card-title>
+                            </v-img>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -26,12 +31,12 @@
                                 <v-list>
                                     <v-list-item-group color="primary">
                                         <v-list-item>
-                                            <v-list-item-content v-if="user.destinations[1]">
-                                                <v-list-item-title v-html="user.destinations[1].city_name">
+                                            <v-list-item-content v-if="user.nextDestination">
+                                                <v-list-item-title v-html="user.nextDestination.city_name">
                                                 </v-list-item-title>
                                                 <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
                                             </v-list-item-content>
-                                            <v-list-item-content v-if="!user.destinations[1]">
+                                            <v-list-item-content v-if="!upcoming">
                                                 <v-list-item-title>No upcoming destinations</v-list-item-title>
                                                 <v-list-item-subtitle></v-list-item-subtitle>
                                             </v-list-item-content>
@@ -56,10 +61,7 @@
                         <v-card class="mx-auto">
                             <v-card-title>{{ user.user_name }} is in {{ user.current_location.city_name }}
                             </v-card-title>
-                            <iframe id="map" frameborder="0" marginheight="0" marginwidth="0"
-                                v-bind:src="'https://www.openstreetmap.org/export/embed.html?bbox=' + (user.current_location.lon-9) + '%2C' + (user.current_location.lat-6) + '%2C' + (user.current_location.lon+9) + '%2C' + (user.current_location.lat+6) + '&amp;layer=mapnik&amp;marker=' + user.current_location.lat + '%2C' + user.current_location.lon">
-                            </iframe>
-
+                            <MapComponent v-bind:users="users"/>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -82,7 +84,10 @@
 </template>
 
 <script>
-    import axios from 'axios'
+import MapComponent from '../components/Map'
+
+    import axios from 'axios';
+
 
     export default {
         name: 'ProfileView',
@@ -90,21 +95,29 @@
             route: Object,
             //user: Object,
         },
-        components: {},
+        components: {
+            MapComponent,
+        },
         data: () => ({
-            baseurl: 'http://127.0.0.1:5345/api/v1/',
+            baseurl: 'http://fabiserv.uber.space/api/v1/',
             interval: "",
             activeUser: {},
             user: {
                 current_location: {
                     photo_url: "",
+                    lat: 0,
+                    lon: 0,
                 },
             },
             friendship: false,
             countdownString: "loading countdown",
-            upcoming: [],
+            upcoming: null,
             day: "",
             time: "",
+            map: {},
+            view: {},
+            users: [],
+            bannerPlaceholder: 'https://s3.amazonaws.com/zweb-s3.uploads/ez2/wp-content/uploads/2018/01/iStock-534661459-copy.jpg'
         }),
         /*
         computed: {
@@ -140,12 +153,11 @@
         },
         */
         methods: {
-
             checkFriendship(profileID) {
                 //user_id == route.params.userid
                 var i = 0
-                for( i in this.friends ){
-                    if (this.friends[i].id == profileID){
+                for (i in this.friends) {
+                    if (this.friends[i].id == profileID) {
                         this.friendship = true
                     }
                 }
@@ -159,13 +171,15 @@
                         this.friends = response.data
                         //this.$session.set("friends", friends)
                         this.checkFriendship(profileID)
-                        if(this.friendship){
+                        if (this.friendship) {
                             if (this.user.destinations.length > 1) {
-                            this.countdown(this.user.destinations[1].date);
-                            this.displayArray(this.user.destinations)
+                                this.countdown(this.user.destinations[1].date);
+                                this.displayArray(this.user.destinations)
+
+                                //this.addLayer(this.user)
+                            }
+
                         }
-                        
-            }
                         //this.calculateDistances()
 
                     })
@@ -182,17 +196,19 @@
                 await axios.get(url)
                     .then(response => {
                         this.user = response.data
+                        this.users.push(this.user)
                         if (this.$session.exists()) {
                             this.getSessionUser()
                             //this.friends = this.$session.get("friends")
                             this.getFriends(this.activeUser.user_id, profileID)
-                            
-                        }
 
+                        }
+/*
                         if (this.user.destinations[1]) {
                             this.countdown(this.user.destinations[1].date);
                             //this.displayArray(this.user.destinations)
                         }
+*/
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -229,10 +245,22 @@
             },
 
             displayArray: function (destinationsArray) {
-                this.upcoming = destinationsArray.slice();
-                this.upcoming.shift();
-                this.upcoming.shift();
+                var i = 0
+                var now = new Date()
+                
+                for (i in destinationsArray) {
+                    var date = new Date(destinationsArray[i].date)
+                    if(date > now && !this.upcoming){
+                        this.user.nextDestination = destinationsArray[i]
+                        this.upcoming = destinationsArray.slice(Number(i) + 1)
+                        this.countdown(this.user.nextDestination.date)                        
+                    }
+                }
+                ;
+                //this.upcoming.shift();
+                //this.upcoming.shift();
             },
+
             formatDateTime() {
                 var i = 0
                 for (i in this.user.destinations) {
@@ -268,17 +296,28 @@
                         }
                     });
                 }
+
             }
+            if (this.$session.exists()) {
+                var user_id = this.$session.get("user").user_id
+                if (this.$router.currentRoute.params.userid == user_id) {
+                    this.$router.replace({
+                        name: "home",
+                    });
+                }
+            }
+
         },
         beforeMount() {
-           
+
         },
         created() {
-            
+
         },
         mounted() {
             this.getUser(this.$route.params.userid)
             this.formatDateTime()
+
         },
     }
 </script>
@@ -301,9 +340,8 @@
     }
 
     #map {
-        padding: 10px 10px 10px 10px;
         width: 100%;
-        min-height: 30vh;
+        height: 100%;
     }
 
     #cover-photo {
@@ -319,8 +357,6 @@
             height: 30vh;
         }
 
-        #map {
-            min-height: 50vh;
-        }
+
     }
 </style>

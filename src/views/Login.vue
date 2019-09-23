@@ -12,8 +12,7 @@
                 <v-card class="mx-auto">
                     <v-card-title style="text-align:center">Welcome to Travel Log</v-card-title>
                     <v-card-text>Please sign in to continue</v-card-text>
-                    <v-form @submit.prevent="postLogin(activeUser, password)"
-                        style="padding-left:18px; padding-right:18px">
+                    <v-form style="padding-left:18px; padding-right:18px" v-if="!register">
                         <v-row>
                             <v-col cols="12">
                                 <v-text-field :rules="[rules.required, rules.email]" label="Email" name="email"
@@ -23,13 +22,44 @@
                         </v-row>
                         <v-row>
                             <v-col cols="12">
-                                <v-text-field :rules="[rules.required]" label="New Password" name="password" v-model="password" required
-                                    :append-icon="e1 ? 'mdi-eye-off' : 'mdi-eye'" @click:append="() => (e1 = !e1)"
-                                    :type="e1 ? 'text' : 'password'">
+                                <v-text-field :rules="[rules.required]" label="Password" name="password"
+                                    v-model="password" required :append-icon="e1 ? 'mdi-eye-off' : 'mdi-eye'"
+                                    @click:append="() => (e1 = !e1)" :type="e1 ? 'text' : 'password'">
                                 </v-text-field>
                             </v-col>
                         </v-row>
-                        <v-row v-if="register">
+                        <v-col cols="4">
+                            <v-btn type="button" v-on:click="postLogin(activeUser, password)" class="mr-4">Login
+                            </v-btn>
+                        </v-col>
+                        <v-col cols="6">
+                            <v-btn v-on:click="register = true" type="button" class="mr-4">Register?</v-btn>
+                        </v-col>
+                    </v-form>
+                    <v-form style="padding-left:18px; padding-right:18px" v-if="register">
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field :rules="[rules.required]" label="Name" name="user_name"
+                                    type="email" v-model="activeUser.user_name" required>
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                         <v-row>
+                            <v-col cols="12">
+                                <v-text-field :rules="[rules.required, rules.email]" label="Email" name="email"
+                                    type="email" v-model="activeUser.email" required>
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field :rules="[rules.required]" label="New Password" name="password"
+                                    v-model="password" required :append-icon="e1 ? 'mdi-eye-off' : 'mdi-eye'"
+                                    @click:append="() => (e1 = !e1)" :type="e1 ? 'text' : 'password'">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
                             <v-col cols="12">
                                 <v-text-field label="Repeat password" name="passwordRepeat" v-model="passwordRepeat"
                                     required :append-icon="e2 ? 'mdi-eye-off' : 'mdi-eye'"
@@ -40,16 +70,12 @@
                         <v-row>
                             <v-col cols="1">
                             </v-col>
-                            <v-col cols="4">
-                                <v-btn type="submit" class="mr-4">Login</v-btn>
-                            </v-col>
+
                             <v-col cols="1" md="1">
                             </v-col>
-                            <v-col v-if="!register" cols="6">
-                                <v-btn v-on:click="register = true" type="submit" class="mr-4">Register?</v-btn>
-                            </v-col>
+
                             <v-col v-if="register" cols="6">
-                                <v-btn v-on:click="registerUser()" class="mr-4">Create Account</v-btn>
+                                <v-btn type="button" v-on:click="registerUser(activeUser, password)" class="mr-4">Create Account</v-btn>
                             </v-col>
 
                         </v-row>
@@ -75,7 +101,7 @@
             activeUser: {},
             password: "",
             passwordRepeat: "",
-            baseurl: "http://localhost:5345/api/v1/",
+            baseurl: "https://fabiserv.uber.space/api/v1/",
             backgroundImage: "https://www.happyviaggithailandia.com/app/public/upload/CAMBOGIA/Koh%20Rong%20Samloem/2.jpg",
             register: false,
             rules: {
@@ -83,7 +109,7 @@
                 email: value => {
                     const pattern = new RegExp(
                         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                        )
+                    )
                     return pattern.test(value) || 'Invalid e-mail.'
                 },
             }
@@ -96,21 +122,22 @@
                     .then(response => {
                         this.activeUser = response.data
                         this.$session.set("user", this.activeUser)
+                        console.log(this.activeUser)
                         this.$session.start()
                         this.$emit("authenticated", true)
-                        if (this.$router.currentRoute.name != 'login'){
+                        if (this.$router.currentRoute.name != 'login') {
                             this.$router.replace({
-                            name: this.$router.currentRoute.query.redirect,
-                            params: {
-                                userid: this.$router.currentRoute.query.user_id,
+                                name: this.$router.currentRoute.query.redirect,
+                                params: {
+                                    userid: this.$router.currentRoute.query.user_id,
                                 }
-                        })
+                            })
                         } else {
                             this.$router.replace({
                                 name: 'home',
                             })
                         }
-                        
+
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -120,8 +147,9 @@
             postLogin(user, password) {
                 if (user.email != "" && password != "") {
                     var passwordHash = require('password-hash');
+                    console.log(passwordHash.generate(password))
                     var url = this.baseurl + 'login'
-                    var authenticated
+                    var authenticated = false;
                     axios.post(url, user)
                         .then(response => {
                             if (response.data == "") {
@@ -145,6 +173,24 @@
                     console.log("please enter username and password")
                 }
             },
+            registerUser(user, password) {
+                var url = this.baseurl + 'register'
+                var passwordHash = require('password-hash');
+                var hashedPassword = passwordHash.generate(password);
+                password = "";
+                user.password_hash = hashedPassword,
+                axios.post(url, user)
+                    .then(response => {
+                        this.$session.set("user", this.activeUser)
+                        this.$session.start()
+                        this.$router.replace({
+                            name: 'home'
+                        })
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+            }
             /*
             setPassword(password) {
                 var passwordHash = require('password-hash');
@@ -156,22 +202,23 @@
 </script>
 
 <style scoped>
-#top-row {
-    padding-top: 20vh;
-}
-#login-container { 
-    background-image: url(https://www.happyviaggithailandia.com/app/public/upload/CAMBOGIA/Koh%20Rong%20Samloem/2.jpg);
-    background-position: center; 
-    height: 92%;
-    }
-
-template {
-    overflow: hidden;
-}
-
-@media only screen and (max-width: 960px){
     #top-row {
-        padding-top: 10vh;
+        padding-top: 20vh;
     }
-}
+
+    #login-container {
+        background-image: url(https://www.happyviaggithailandia.com/app/public/upload/CAMBOGIA/Koh%20Rong%20Samloem/2.jpg);
+        background-position: center;
+        height: 92%;
+    }
+
+    template {
+        overflow: hidden;
+    }
+
+    @media only screen and (max-width: 960px) {
+        #top-row {
+            padding-top: 10vh;
+        }
+    }
 </style>

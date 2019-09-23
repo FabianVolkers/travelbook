@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import ProfileView from '../views/ProfileView'
 import UserSettings from '../views/UserSettings'
 import Friends from '../views/Friends'
+import Search from '../views/Search'
 //import AdminPanel from '../views/AdminPanel'
 import Cities from '../views/Cities'
 import Users from '../views/Users'
@@ -18,6 +19,7 @@ export default new Router({
             name: "login",
             component: Login
         },
+
         {
             path: "/home",
             name: "home",
@@ -41,9 +43,9 @@ export default new Router({
             props: true,
         },
         {
-            path: "/admin",
-            name: "admin",
-            component: Cities,
+            path: "/search",
+            name: "search",
+            component: Search,
         },
         {
         path: "/cities",
