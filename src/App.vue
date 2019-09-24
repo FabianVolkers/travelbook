@@ -42,6 +42,7 @@
         
       </v-list>
     </v-menu>
+    <v-btn color="white" @click="$router.push({name: 'search'})"><v-icon>{{  'mdi-magnify'  }}</v-icon></v-btn>
         </v-toolbar-items>
 
       </v-toolbar>

@@ -35,7 +35,7 @@
                                                 </v-list-item-title>
                                                 <v-list-item-subtitle v-html="countdownString"></v-list-item-subtitle>
                                             </v-list-item-content>
-                                            <v-list-item-content v-if="!activeUser.destinations || !activeUser.destinations[i]">
+                                            <v-list-item-content v-if="!upcoming">
                                                 <v-list-item-title>No upcoming destinations</v-list-item-title>
                                                 <v-list-item-subtitle></v-list-item-subtitle>
                                             </v-list-item-content>

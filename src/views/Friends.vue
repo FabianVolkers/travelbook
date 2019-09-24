@@ -16,7 +16,7 @@
                         <v-card>
                             <v-card-title>Map</v-card-title>
 
-                            <MapComponent v-if="gotFriends" v-bind:users="friends" />
+                            <MapComponent v-bind:users="friends" />
 
                         </v-card>
                     </v-col>
@@ -28,8 +28,12 @@
                 </v-row>
             </v-col>
             <v-col cols="12" md="4" lg="4" order-md="1">
+                <v-row>
+                    <v-col cols="12">
                 <v-card>
-                    <v-card-title>Your Friends<v-btn @click="$router.push({name: 'search'})">Find Friends</v-btn></v-card-title>
+                    <v-card-title>Your Friends</v-card-title>
+                    <v-card-text v-if="!friends[0]">You don't have any friends yet</v-card-text>
+                    <v-btn style="margin-left:28%" color="primary" v-if="!friends[0]" @click="$router.push({name: 'search'})">Find Friends</v-btn>
                     <v-list>
                         <v-list-item-group color="primary">
                             <v-list-item two-line v-for="(friend, i) in renderArray" :key="i"
@@ -58,16 +62,24 @@
                         </v-list-item-group>
                     </v-list>
                 </v-card>
+                    </v-col>
+                </v-row>
+                <v-row>
+                </v-row>
+                <v-row>
+                    <v-col cols="12">
                 <v-card>
                     <v-card-title>Friend Requests</v-card-title>
-                    <v-card-text v-if="!friendRequests">No pending friend requests</v-card-text>
+                    <v-card-text v-if="!friendRequests[0]">No pending friend requests</v-card-text>
                     <v-list v-if="friendRequests">
-                        <v-list-item v-for="(user, i) in friendRequests" :key="i">
+                        <v-list-item two-line v-for="(user, i) in friendRequests" :key="i">
                             <v-list-item-title>{{  user.user_name  }}</v-list-item-title>
-                            <v-btn @click="acceptFriend(user.user_id)">Add friend</v-btn>
+                            <v-btn @click="acceptFriend(user)">Add friend</v-btn>
                         </v-list-item>
                     </v-list>
                 </v-card>
+                    </v-col>
+                </v-row>
             </v-col>
 
 
@@ -135,13 +147,20 @@
                     })
             },
 
-            async acceptFriend(userid) {
-                var url = this.baseurl + "destinations/friends/user/" + userid
-                await axios.get(url)
+            async acceptFriend(friendship) {
+                var url = this.baseurl + "friend/accept"
+                await axios.post(url, friendship)
                     .then(response => {
-                        this.destinations = response.data
-                        this.destinations = this.formatDateTime(this.destinations)
-                        this.displayArray(this.destinations)
+                        var i
+                        for (i in this.friendRequests){
+                            if (this.friendRequests[i].friendship_id == friendship.friendship_id){
+                                this.friendRequests.slice(i,1)
+                                this.getFriends()
+                            }
+                        }
+                        //this.friends.push = response.data
+                        //this.destinations = this.formatDateTime(this.destinations)
+                        //this.displayArray(this.destinations)
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -276,7 +295,11 @@
                 this.getSessionUser()
             }
             this.getFriends(this.activeUser.user_id)
-            this.friends[0] = this.activeUser
+            console.log(this.activeUser)
+            if(this.activeUser.current_location){
+                this.friends[0] = this.activeUser
+            }
+            
             this.getFriendRequests(this.activeUser.user_id)
 
             //this.distancesView()

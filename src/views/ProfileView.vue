@@ -71,7 +71,7 @@
                         <v-card id="no-friendship">
                             <v-icon large>mdi-lock-outline</v-icon>
                             <v-card-text>{{  user.user_name  }}'s profile is set to private.</v-card-text>
-                            <v-btn color="secondary">Send Friend Request</v-btn>
+                            <v-btn color="secondary" v-on:click="addFriend(activeUser, user)">Send Friend Request</v-btn>
                         </v-card>
                     </v-col>
                     <v-col cols="0" md="2"></v-col>
@@ -99,16 +99,10 @@ import MapComponent from '../components/Map'
             MapComponent,
         },
         data: () => ({
-            baseurl: 'http://fabiserv.uber.space/api/v1/',
+            baseurl: 'https://fabiserv.uber.space/api/v1/',
             interval: "",
             activeUser: {},
-            user: {
-                current_location: {
-                    photo_url: "",
-                    lat: 0,
-                    lon: 0,
-                },
-            },
+            user: null,
             friendship: false,
             countdownString: "loading countdown",
             upcoming: null,
@@ -157,7 +151,7 @@ import MapComponent from '../components/Map'
                 //user_id == route.params.userid
                 var i = 0
                 for (i in this.friends) {
-                    if (this.friends[i].id == profileID) {
+                    if (this.friends[i].user_id == profileID) {
                         this.friendship = true
                     }
                 }
@@ -195,8 +189,10 @@ import MapComponent from '../components/Map'
 
                 await axios.get(url)
                     .then(response => {
+                        console.log(response.data)
                         this.user = response.data
                         this.users.push(this.user)
+                        this.formatDateTime()
                         if (this.$session.exists()) {
                             this.getSessionUser()
                             //this.friends = this.$session.get("friends")
@@ -216,6 +212,20 @@ import MapComponent from '../components/Map'
 
             },
 
+            addFriend(activeUser, user){
+                var url = this.baseurl + "friend/new"
+                var requestBody = {
+                    activeUser: activeUser,
+                    user: user,
+                }
+                axios.post(url, requestBody)
+                    .then(response => {
+                        console.log(response.data)
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+            },
             countdown: function (timestamp) {
                 // Get todays date and time
                 var x = setInterval(function () {
@@ -316,7 +326,7 @@ import MapComponent from '../components/Map'
         },
         mounted() {
             this.getUser(this.$route.params.userid)
-            this.formatDateTime()
+            
 
         },
     }
