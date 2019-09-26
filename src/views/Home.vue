@@ -7,13 +7,13 @@
                 <v-row id="title-row" no-gutters>
                     <v-col cols="12">
                         <v-card class="mx-auto" width="100%" v-if="activeUser.current_location">
-                            <v-img id="cover-photo" class="white--text" v-bind:src="activeUser.current_location.photo_url">
+                            <v-img id="cover-user" class="white--text banner-photo" v-bind:src="activeUser.current_location.photo_url">
                                 <v-card-title class="align-end fill-height">Welcome Back, {{ activeUser.user_name }}! Enjoy
                                     your time in {{  activeUser.current_location.city_name }}</v-card-title>
                             </v-img>
                         </v-card>
                         <v-card class="mx-auto" width="100%" v-if="!activeUser.current_location">
-                            <v-img id="cover-photo" class="white--text" v-bind:src="bannerPlaceholder">
+                            <v-img id="cover-placeholder" class="white--text banner-photo" v-bind:src="bannerPlaceholder">
                                 <v-card-title class="align-end fill-height">Welcome, {{ activeUser.user_name }}!</v-card-title>
                             </v-img>
                         </v-card>
@@ -51,9 +51,8 @@
                                         </v-list-item>
                                     </v-list-item-group>
                                 </v-list>
-
-                                <NewDestination v-bind:activeUser="activeUser" />
-                            </v-card>
+                                <v-btn class="mr-4" @click="$router.push({name: 'destinations'})">Edit Destinations</v-btn>
+                               </v-card>
                         </v-row>
 
                     </v-col>
@@ -79,7 +78,6 @@
 
 <script>
     //import UpcomingDestinations from '../components/UpcomingDestinations'
-    import NewDestination from './NewDestination'
     import MapComponent from '../components/Map'
 
     import axios from 'axios'
@@ -92,7 +90,7 @@
         },
         components: {
             //UpcomingDestinations,
-            NewDestination,
+            
             MapComponent
         },
         data: () => ({
@@ -176,7 +174,6 @@
             getSessionUser() {
                 this.activeUser = this.$session.get("user")
                 this.users.push(this.activeUser)
-                //console.log(this.activeUser)
             }
             
 
@@ -201,6 +198,7 @@
         mounted() {
             this.formatDateTime()
             if (this.activeUser.destinations) {
+                this.$session.set("user", this.activeUser)
                 if (this.activeUser.destinations[1]){
                     this.displayArray(this.activeUser.destinations)
                 }
@@ -214,7 +212,7 @@
     #title-row {
         background-position: center;
         background-size: cover;
-        height: 10vh;
+        height: 30vh;
     }
 
     #title-row h1 {
@@ -226,17 +224,17 @@
         height: 100%;
     }
 
-    #cover-photo {
+    .banner-photo {
         height: 30vh;
     }
 
-    @media screen and (min-width: 500px) {
-        #title-row {
-            height: 30vh;
-        }
+    @media screen and (max-width: 500px) {
+        .banner-photo {
+        height: 15vh;
+    }
 
-        #cover-photo {
-        height: 30vh;
+#title-row {
+        height: 15vh;
     }
 
         #map {

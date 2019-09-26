@@ -10,22 +10,6 @@
           <v-btn color="white" text @click="$router.push({name: 'home'})">Home</v-btn>
           <v-btn color="white" text @click="$router.push({name: 'friends'})">Friends</v-btn>
           
-          <v-menu offset-y v-if="activeUser.admin_status"> <!--- v-if="activeUser.admin_status == 1"--->
-      <template v-slot:activator="{ on }">
-        <v-btn color="white" text v-on="on">
-          Admin
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-item @click="$router.push({name: 'users'})">
-<v-list-item-title>Manage Users</v-list-item-title>
-        </v-list-item> 
-        <v-list-item @click="$router.push({name: 'cities'})">
-<v-list-item-title>Manage Cities</v-list-item-title>
-        </v-list-item>         
-        
-      </v-list>
-    </v-menu>
     <v-menu offset-y v-if="activeUser"> <!--- v-if="activeUser.admin_status == 1"--->
       <template v-slot:activator="{ on }">
         <v-btn color="white" text v-on="on">
@@ -42,13 +26,12 @@
         
       </v-list>
     </v-menu>
-    <v-btn color="white" @click="$router.push({name: 'search'})"><v-icon>{{  'mdi-magnify'  }}</v-icon></v-btn>
+    <v-btn color="primary" depressed @click="$router.push({name: 'search'})"><v-icon color="white">{{  'mdi-magnify'  }}</v-icon></v-btn>
         </v-toolbar-items>
 
       </v-toolbar>
 
       <router-view @authenticated="getUser(activeUser)" />
-
       <ProfileView v-if="tab == 3" v-bind:user="activeUser" />
 
     </v-content>
@@ -112,7 +95,8 @@
           .then(response => {
             this.activeUser = response.data
             this.$session.set("user", this.activeUser)
-            return this.activeUser
+            console.log(this.activeUser)
+            //return this.activeUser
           })
           .catch(e => {
             this.errors.push(e)

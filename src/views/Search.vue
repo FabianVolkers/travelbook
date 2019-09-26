@@ -35,7 +35,6 @@ export default {
                 var url = this.baseurl + "search/" + this.query
                 await axios.get(url)
                     .then(response => {
-                        console.log(response.data)
                         this.searchResults = response.data.slice()
                     })
                     .catch(e => {

@@ -10,6 +10,7 @@
                 <v-card>
                     <v-card-title>Personal Information</v-card-title>
                     <v-form>
+                        <v-card-text>Change Profile Photo</v-card-text>
                     <v-text-field :rules="[]" label="Name" name="name" :append-icon="'mdi-edit'"
                                     @click:append="() => (e1 = !e1)" v-model="activeUser.user_name">
                                 </v-text-field>
@@ -35,6 +36,18 @@
                 <v-card>
                     <v-card-title>Privacy Settings</v-card-title>
 
+                </v-card>
+                <v-card v-if="activeUser.admin_status == 1">
+                    <v-card-title>Admin Settings</v-card-title>
+                    <v-list>
+        <v-list-item @click="$router.push({name: 'users'})">
+<v-list-item-title>Manage Users</v-list-item-title>
+        </v-list-item> 
+        <v-list-item @click="$router.push({name: 'cities'})">
+<v-list-item-title>Manage Cities</v-list-item-title>
+        </v-list-item>         
+        
+      </v-list>
                 </v-card>
             </v-col>
             <v-col cols="0" md="1">

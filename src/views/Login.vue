@@ -121,10 +121,14 @@
                 await axios.get(url)
                     .then(response => {
                         this.activeUser = response.data
+                        
                         this.$session.set("user", this.activeUser)
-                        console.log(this.activeUser)
                         this.$session.start()
+                        console.log(this.$session.getAll())
                         this.$emit("authenticated", true)
+                        if(this.activeUser.admin_status == 1){
+                            this.$emit("admin", true)
+                        }
                         if (this.$router.currentRoute.name != 'login') {
                             this.$router.replace({
                                 name: this.$router.currentRoute.query.redirect,
@@ -147,7 +151,6 @@
             postLogin(user, password) {
                 if (user.email != "" && password != "") {
                     var passwordHash = require('password-hash');
-                    console.log(passwordHash.generate(password))
                     var url = this.baseurl + 'login'
                     var authenticated = false;
                     axios.post(url, user)

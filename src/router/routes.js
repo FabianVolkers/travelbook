@@ -9,6 +9,7 @@ import Cities from '../views/Cities'
 import Users from '../views/Users'
 import Login from '../views/Login'
 import Home from '../views/Home'
+import Destinations from '../views/Destinations'
 
 Vue.use(Router)
 
@@ -24,6 +25,11 @@ export default new Router({
             path: "/home",
             name: "home",
             component: Home,
+        },
+        {
+            path: "/destinations",
+            name: "destinations",
+            component: Destinations,
         },
         {
             path: "/profile/user/:userid",

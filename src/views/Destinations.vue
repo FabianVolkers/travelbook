@@ -1,8 +1,5 @@
 <template>
   <div>
-    <v-btn class="mr-4" @click="showOverlay">Edit</v-btn>
-
-    <v-overlay id="overlay" v-if="overlay == true" style="overflow:scroll;">
       <v-container>
         <v-list id="destinations-list">
         <v-list-item two-line v-for="(destination, i) in activeUser.destinations" :key="i">
@@ -25,10 +22,10 @@
                 <v-col cols="12" md="3">
                   <v-text-field label="Time" name="time" v-model="destination.time" required></v-text-field>
                 </v-col>
-                <v-col cols="12" md="1">
+                <v-col cols="6" md="1">
                   <v-btn type="submit" class="mr-2">Save</v-btn>
                 </v-col>
-                <v-col cols="12" md="1">
+                <v-col cols="6" md="1">
                   <v-btn class="mr-4" @click="deleteDestination(destination)">Delete</v-btn>
                 </v-col>
               </v-row>
@@ -65,12 +62,11 @@
         
         <v-row>
           <v-col>
-            <v-btn class="mr-4" @click="showOverlay">Close</v-btn>
+            <v-btn class="mr-4" @click="$router.push({name: 'home'})">Done</v-btn>
           </v-col>
         </v-row>
         </v-list>
       </v-container>
-    </v-overlay>
   </div>
 </template>
 
@@ -78,11 +74,12 @@
   import axios from 'axios'
 
   export default {
-    name: 'NewDestination',
+    name: 'Destinations',
     props: {
-      activeUser: Object,
+      
     },
     data: () => ({
+      activeUser: {},
       overlay: false,
       baseurl: "https://fabiserv.uber.space/api/v1/",
       newDestination: {
@@ -95,9 +92,10 @@
 
     }),
     methods: {
-      showOverlay() {
-        this.overlay = !this.overlay;
-      },
+      getSessionUser() {
+                this.activeUser = this.$session.get("user")
+            },
+      
       addDestination() {
         var url = this.baseurl + 'destination/add'
 
@@ -170,6 +168,17 @@
       }
     },
     mounted() {
+      if(this.$session.exists()){
+        this.getSessionUser()
+      } else {
+        this.$router.push({
+                        name: "login",
+                        query: {
+                            redirect: this.$router.currentRoute.name
+                        }
+                    });
+      }
+      
       //this.activeUser = this.$session.get("user")
     }
   }

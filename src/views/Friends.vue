@@ -16,7 +16,7 @@
                         <v-card>
                             <v-card-title>Map</v-card-title>
 
-                            <MapComponent v-bind:users="friends" />
+                            <MapComponent v-if="gotFriends" v-bind:users="friends" />
 
                         </v-card>
                     </v-col>
@@ -32,16 +32,16 @@
                     <v-col cols="12">
                 <v-card>
                     <v-card-title>Your Friends</v-card-title>
-                    <v-card-text v-if="!friends[0]">You don't have any friends yet</v-card-text>
-                    <v-btn style="margin-left:28%" color="primary" v-if="!friends[0]" @click="$router.push({name: 'search'})">Find Friends</v-btn>
+                    <v-card-text v-if="!friends[1]">You don't have any friends yet</v-card-text>
+                    <v-btn style="margin-left:28%" color="primary" v-if="!friends[1]" @click="$router.push({name: 'search'})">Find Friends</v-btn>
                     <v-list>
-                        <v-list-item-group color="primary">
+                        <v-list-item-group v-if="friends[1]" color="primary">
                             <v-list-item two-line v-for="(friend, i) in renderArray" :key="i"
                                 @click="$router.push({name: 'profile', params: {userid: friend.user_id}})">
                                 <v-list-item-content>
                                     <v-row>
                                         <v-col cols="3">
-                                            <v-img :src="'fabiserv.uber.space/images/users/' + friend.profile_photo"
+                                            <v-img :src="'https://fabiserv.uber.space/travelapp/images/users/' + friend.profile_photo"
                                                 class="grey lighten-2" aspect-ratio="1"
                                                 style="max-height:100px; max-width:100px"></v-img>
                                         </v-col>
@@ -70,7 +70,7 @@
                     <v-col cols="12">
                 <v-card>
                     <v-card-title>Friend Requests</v-card-title>
-                    <v-card-text v-if="!friendRequests[0]">No pending friend requests</v-card-text>
+                    <v-card-text v-if="!friendRequests">No pending friend requests</v-card-text>
                     <v-list v-if="friendRequests">
                         <v-list-item two-line v-for="(user, i) in friendRequests" :key="i">
                             <v-list-item-title>{{  user.user_name  }}</v-list-item-title>
@@ -118,15 +118,17 @@
             setUsers(friend) {
                 //this.users = this.friends.slice()
                 //this.users.unshift(this.activeUser)
-                console.log(friend)
             },
             async getFriends(userid) {
+                
                 var url = this.baseurl + "destinations/friends/user/" + userid
                 await axios.get(url)
                     .then(response => {
-                        this.destinations = response.data
+                        console.log(response)
+                        this.destinations = response.data.slice()
                         this.destinations = this.formatDateTime(this.destinations)
                         this.displayArray(this.destinations)
+                        
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -138,9 +140,9 @@
                 var url = this.baseurl + "requests/user/" + userid
                 await axios.get(url)
                     .then(response => {
-                        console.log(response)
-                        this.friendRequests = response.data.slice()
-                        
+                        if(response.data[0]){
+                            this.friendRequests = response.data.slice()
+                        }
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -155,7 +157,7 @@
                         for (i in this.friendRequests){
                             if (this.friendRequests[i].friendship_id == friendship.friendship_id){
                                 this.friendRequests.slice(i,1)
-                                this.getFriends()
+                                this.getFriends(this.activeUser.user_id)
                             }
                         }
                         //this.friends.push = response.data
@@ -170,10 +172,9 @@
 
             displayArray(destinations) {
                 var now = new Date()
-
-                console.log(this.friends)
                 var i = 0
                 while (i <= destinations.length) {
+                    console.log(destinations)
                     var friend = {
                         name: destinations[i].user_name,
                         user_id: destinations[i].user_id,
@@ -184,11 +185,9 @@
                     while (destinations[i].user_name == friend.name) {
                         var destinationDate = new Date(destinations[i].date)
                         if (destinationDate > now) {
-                            console.log(destinations[i])
                             friend.destinations.push(destinations[i])
                         }
 
-                        //console.log(destinationDate)
 
                         if (destinationDate > now && !friend.current_location) {
                             friend.current_location = destinations[i - 1]
@@ -201,15 +200,17 @@
                                 nextDestination.date = ""
                                 friend.destinations.push(nextDestination)
                                 if (i == destinations.length - 1) {
+                                    //console.log(this.friends)
                                     this.gotFriends = true
                                 }
                             }
-                          
+                          //this might be wrong
                             if (destinationDate > now) {
                                 this.renderArray.push(friend)
                             }
-
+                            
                             this.friends.push(friend)
+                            //console.log(this.friends)
                             this.$session.set("friends", this.friends)
                             //this.setUser(friend)
                             if (i == destinations.length - 1) {
@@ -258,7 +259,6 @@
                                 for(j in friends[i].destinations){
                                     friends[i].distances.push(Math.sqrt(Math.pow(Number(friends[i].destinations[j].lat) - Number(this.activeUser.current_location.lat), 2) * Math.pow(Number(friends[i].destinations[j].lon) - Number(this.activeUser.current_location.lon) , 2)))
                                 }
-                                console.log(friends[i].distances)
                             }
                             return friends
                         }
@@ -287,20 +287,20 @@
         mounted() {
 
 
-
-
         },
         created() {
             if (this.$session.exists()) {
                 this.getSessionUser()
+                console.log(this.$session.getAll())
             }
             this.getFriends(this.activeUser.user_id)
-            console.log(this.activeUser)
             if(this.activeUser.current_location){
-                this.friends[0] = this.activeUser
+                this.friends.push(this.activeUser)
             }
             
             this.getFriendRequests(this.activeUser.user_id)
+            
+            
 
             //this.distancesView()
         }

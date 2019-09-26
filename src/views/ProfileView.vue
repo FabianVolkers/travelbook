@@ -6,21 +6,25 @@
             <v-col cols="12" md="10" lg="10">
                 <v-row id="title-row" no-gutters>
                     <v-col cols="12">
-                        <v-card class="mx-auto" width="100%" v-if="user.current_location && friendship">
-                            <v-img id="cover-photo" class="white--text" v-bind:src="user.current_location.photo_url">
+                        <v-card class="mx-auto" width="100%"
+                            v-if="user && user.current_location && friendship == 'confirmed'">
+                            <v-img id="cover-user" class="white--text banner-photo"
+                                v-bind:src="user.current_location.photo_url">
                                 <v-card-title class="align-end fill-height">{{ user.user_name }}'s Travels!
                                 </v-card-title>
                             </v-img>
 
                         </v-card>
-                        <v-card class="mx-auto" width="100%" v-if="!user.current_location || !friendship">
-                            <v-img id="cover-photo" class="white--text" v-bind:src="bannerPlaceholder">
+                        <v-card class="mx-auto" width="100%"
+                            v-if="user && (!user.current_location || friendship == 'no' || friendship == 'pending')">
+                            <v-img id="cover-placeholder" class="white--text banner-photo"
+                                v-bind:src="bannerPlaceholder">
                                 <v-card-title class="align-end fill-height">{{ user.user_name }}!</v-card-title>
                             </v-img>
                         </v-card>
                     </v-col>
                 </v-row>
-                <v-row v-if="friendship">
+                <v-row v-if="user && friendship == 'confirmed'">
                     <v-col cols="12" sm="4" xs="12" order="12" order-md="1" order-lg="1">
                         <!--<UpcomingDestinations v-bind:user="this.user" v-bind:destinations="destinations" />-->
 
@@ -61,17 +65,18 @@
                         <v-card class="mx-auto">
                             <v-card-title>{{ user.user_name }} is in {{ user.current_location.city_name }}
                             </v-card-title>
-                            <MapComponent v-bind:users="users"/>
+                            <MapComponent v-bind:users="users" />
                         </v-card>
                     </v-col>
                 </v-row>
-                <v-row v-if="!friendship">
+                <v-row v-if="user && friendship == 'no' || friendship == 'pending'">
                     <v-col cols="0" md="2"></v-col>
                     <v-col cols="12" md="8">
                         <v-card id="no-friendship">
                             <v-icon large>mdi-lock-outline</v-icon>
                             <v-card-text>{{  user.user_name  }}'s profile is set to private.</v-card-text>
-                            <v-btn color="secondary" v-on:click="addFriend(activeUser, user)">Send Friend Request</v-btn>
+                            <v-btn color="secondary" :disabled=requestSent v-html="requestSent ? 'Friend Request Sent' : 'Send Friend Request'" v-on:click="addFriend(activeUser, user)">
+                            </v-btn>
                         </v-card>
                     </v-col>
                     <v-col cols="0" md="2"></v-col>
@@ -84,7 +89,7 @@
 </template>
 
 <script>
-import MapComponent from '../components/Map'
+    import MapComponent from '../components/Map'
 
     import axios from 'axios';
 
@@ -103,7 +108,8 @@ import MapComponent from '../components/Map'
             interval: "",
             activeUser: {},
             user: null,
-            friendship: false,
+            friendship: "loading",
+            requestSent: false,
             countdownString: "loading countdown",
             upcoming: null,
             day: "",
@@ -152,8 +158,12 @@ import MapComponent from '../components/Map'
                 var i = 0
                 for (i in this.friends) {
                     if (this.friends[i].user_id == profileID) {
-                        this.friendship = true
+                        this.friendship = this.friends[i].friendship_status
+                        console.log(this.friendship)
                     }
+                }
+                if (this.friendship == "loading") {
+                    this.friendship = "no"
                 }
             },
 
@@ -165,7 +175,7 @@ import MapComponent from '../components/Map'
                         this.friends = response.data
                         //this.$session.set("friends", friends)
                         this.checkFriendship(profileID)
-                        if (this.friendship) {
+                        if (this.friendship == "confirmed") {
                             if (this.user.destinations.length > 1) {
                                 this.countdown(this.user.destinations[1].date);
                                 this.displayArray(this.user.destinations)
@@ -173,6 +183,9 @@ import MapComponent from '../components/Map'
                                 //this.addLayer(this.user)
                             }
 
+                        }
+                        if (this.friendship == "pending") {
+                            this.requestSent = true
                         }
                         //this.calculateDistances()
 
@@ -189,7 +202,6 @@ import MapComponent from '../components/Map'
 
                 await axios.get(url)
                     .then(response => {
-                        console.log(response.data)
                         this.user = response.data
                         this.users.push(this.user)
                         this.formatDateTime()
@@ -199,12 +211,12 @@ import MapComponent from '../components/Map'
                             this.getFriends(this.activeUser.user_id, profileID)
 
                         }
-/*
-                        if (this.user.destinations[1]) {
-                            this.countdown(this.user.destinations[1].date);
-                            //this.displayArray(this.user.destinations)
-                        }
-*/
+                        /*
+                                                if (this.user.destinations[1]) {
+                                                    this.countdown(this.user.destinations[1].date);
+                                                    //this.displayArray(this.user.destinations)
+                                                }
+                        */
                     })
                     .catch(e => {
                         this.errors.push(e)
@@ -212,16 +224,16 @@ import MapComponent from '../components/Map'
 
             },
 
-            addFriend(activeUser, user){
+            addFriend(activeUser, user) {
+                this.friendship = "pending"
+                this.requestSent = true
                 var url = this.baseurl + "friend/new"
                 var requestBody = {
                     activeUser: activeUser,
                     user: user,
                 }
                 axios.post(url, requestBody)
-                    .then(response => {
-                        console.log(response.data)
-                    })
+                    .then(response => {})
                     .catch(e => {
                         this.errors.push(e)
                     })
@@ -257,16 +269,15 @@ import MapComponent from '../components/Map'
             displayArray: function (destinationsArray) {
                 var i = 0
                 var now = new Date()
-                
+
                 for (i in destinationsArray) {
                     var date = new Date(destinationsArray[i].date)
-                    if(date > now && !this.upcoming){
+                    if (date > now && !this.upcoming) {
                         this.user.nextDestination = destinationsArray[i]
                         this.upcoming = destinationsArray.slice(Number(i) + 1)
-                        this.countdown(this.user.nextDestination.date)                        
+                        this.countdown(this.user.nextDestination.date)
                     }
-                }
-                ;
+                };
                 //this.upcoming.shift();
                 //this.upcoming.shift();
             },
@@ -292,6 +303,7 @@ import MapComponent from '../components/Map'
             },
             getSessionUser() {
                 this.activeUser = this.$session.get("user")
+                console.log(this.activeUser)
             },
 
         },
@@ -326,7 +338,8 @@ import MapComponent from '../components/Map'
         },
         mounted() {
             this.getUser(this.$route.params.userid)
-            
+
+
 
         },
     }
@@ -336,7 +349,7 @@ import MapComponent from '../components/Map'
     #title-row {
         background-position: center;
         background-size: cover;
-        height: 10vh;
+        height: 30vh;
     }
 
     #title-row h1 {
@@ -354,17 +367,17 @@ import MapComponent from '../components/Map'
         height: 100%;
     }
 
-    #cover-photo {
-        height: 10vh;
+    .banner-photo {
+        height: 30vh;
     }
 
-    @media screen and (min-width: 500px) {
+    @media screen and (max-width: 500px) {
         #title-row {
-            height: 30vh;
+            height: 15vh;
         }
 
-        #cover-photo {
-            height: 30vh;
+        .banner-photo {
+            height: 15vh;
         }
 
 

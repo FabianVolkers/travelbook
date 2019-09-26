@@ -34,7 +34,7 @@
         }),
         methods: {
             addLayer(user) {
-                console.log(user)
+                
                 var layer = new VectorLayer({
                     source: new VectorSource({
                         features: [
@@ -50,11 +50,12 @@
                     }),
                     style: new Style({
                         image: new Icon({
-                            src: 'http://www.goga.gy/sites/default/files/default_images/placeholder.png',
+                            src: 'https://fabiserv.uber.space/travelapp/images/users/placeholder.png',//+ user.profile_photo,
                             scale: 0.09,
                         })
                     })
                 })
+                
                 this.map.addLayer(layer)
             },
 
@@ -81,13 +82,11 @@
             },
         },
         mounted() {
-            console.log(this.users)
             if (this.users[0]) {
                 if (this.users[0].current_location) {
                     this.loadMap(this.users[0].current_location.lat, this.users[0].current_location.lon)
                     var i = 0
                     for (i in this.users) {
-                        console.log(i)
                         this.addLayer(this.users[i])
                         i += 1
                     }
