@@ -1,8 +1,7 @@
 .DS_Store
-/dist
+dist
 node_modules/.cache
-/node_modules/.
-/node_modules
+node_modules
 
 # local env files
 .env.local
@@ -35,4 +34,14 @@ node_modules/.cache/vue-loader/aa0e86feb74aedddbc737339dadc3343.json
 node_modules/.cache/vue-loader/b650927411f14c6304f4543d96986292.json
 node_modules/.cache/vue-loader/f5884e8e63ec4b8768204fecd0e9db3f.json
 node_modules/.cache/vue-loader/f85754ce00c9df2d600e826783c67bef.json
+
+#files
+Travelbook.code-workspace
+servTravelDump.sql
+travelDump.sql
+travelbook_db190919
+travelbook_db190919.sql
+travelbook_db_190914.sql
 deploy.sh
+src/components/zzz_deprecated
+src/components/Template.vue

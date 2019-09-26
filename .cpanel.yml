@@ -1,6 +1,0 @@
----
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/fabidton/travel/app
-    - cp -R ./ $DEPLOYPATH
-    - cp -R ./src $DEPLOYPATH
